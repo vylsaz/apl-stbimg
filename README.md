@@ -1,6 +1,6 @@
 ## apl-stbimg
-![sample](image/mandelbrot.png)
+Save and load image in dyalog APL. Based on [stb_image](https://github.com/nothings/stb).
 
-[stb_image](https://github.com/nothings/stb) in APL.
+![sample](image/mandelbrot.png)
 
 WIP
