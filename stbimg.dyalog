@@ -31,9 +31,9 @@
             Fjpg←'STBIMG_Save_JPG_Raw'
             Ftga←'STBIMG_Save_TGA_Raw'
             Ext←{{1↓⍵/⍨∨\⌽<\⌽⍵='.'}1↓(⊢↓⍨'\/'∊⍨⊃)⍵/⍨∨\⌽<\⌽(1↑⍨≢⍵)∨'\/'∊⍨⍵}
-            Raw←((,∘⍉⍤2)1 0 2⍉↑)
+            Raw←{,1 3 0 2⍉(⊢⍴⍨1,⍴)↑⍵}
             x←¯1⎕C Ext ⍺
-            y←,⊆⍵ ⋄ r←,Raw y ⋄ h w←⍴⊃y ⋄ c←≢y  
+            y←,⊆⍵ ⋄ r←Raw y ⋄ h w←⍴⊃y ⋄ c←≢y  
             x≡'png':(Fpng _C._call_ type)⍺ w h c r
             x≡'bmp':(Fbmp _C._call_ type)⍺ w h c r 
             (x≡'jpg')∨x≡'jpeg':(Fjpg _C._call_ type)⍺ w h c r
