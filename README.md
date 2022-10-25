@@ -1,5 +1,5 @@
 # apl-stbimg
-Save and load image in dyalog APL. Based on [stb_image](https://github.com/nothings/stb).
+Save and load image in Dyalog APL. Based on [stb_image](https://github.com/nothings/stb).
 
 ![example](image/mandelbrot.png)
 
@@ -71,7 +71,7 @@ Y is the path of a file whose format is jpg, bmp or png.
 The image is displayed on a window implemented in Dyalog GUI object.
 
 ## Example
-See `mandelbrot.dyalog`.
+See `mandelbrot.dyalog`. (A dialog about network access might show up -- that is due to `isolate`.)
 
 ## License
 `stbimg.c`, `stbimg.dyalog` and `mandelbrot.dyalog` are under MIT license.
