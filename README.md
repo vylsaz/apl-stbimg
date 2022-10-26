@@ -38,7 +38,7 @@ X, if present, is one of 1, 2, 3 or 4. It represents the number of color channel
 | 4 | rgb and alpha |
 
 If X is not present, the number of channels is decided by the image.  
-R is a vector of matrices. Length of R equals to X if X is present.  
+R is a vector of matrices. Length of R equals to the number of channels. Thus if X is present, `X≡≢R`.  
 The shape of matrices in R equals to `height,width` of the image.
 
 ```apl
