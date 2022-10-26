@@ -27,61 +27,27 @@
 #define STBIMG_API
 #endif//_WIN32
 
-#ifdef __GNUC__
-#define FALLTHRU    __attribute__((fallthrough))
-#else
-#define FALLTHRU    
-#endif
-
-typedef uint8_t  U1;
-typedef int32_t  I4;
-typedef float    F4;
+typedef uint8_t U1;
+typedef int32_t I4;
+typedef float   F4;
 
 // notice that it uses I4 (not a big problem)
 STBIMG_API I4 STBIMG_Info(char const *filename, I4 *width, I4 *height, I4 *channels) {
+    *width = 0; *height = 0; *channels = 0;
     return stbi_info(filename, width, height, channels);
-}
-
-STBIMG_API void STBIMG_Load(char const *filename, I4 channels, U1 *ch1, U1 *ch2, U1 *ch3, U1 *ch4) {
-    I4 width = 0, height = 0, comp = 0;
-    U1 *data = stbi_load(filename, &width, &height, &comp, channels);
-    // Read data to provided arrays
-    for (I4 i = 0; i<height; ++i) {
-        U1 *row = &data[i*channels*width];
-        for (I4 j = 0; j<width; ++j) {
-            switch (channels) {
-            case 4: ch4[j+width*i] = row[3+channels*j]; FALLTHRU;
-            case 3: ch3[j+width*i] = row[2+channels*j]; FALLTHRU;
-            case 2: ch2[j+width*i] = row[1+channels*j]; FALLTHRU;
-            case 1: ch1[j+width*i] = row[0+channels*j];
-            }
-        }
-    }
-    stbi_image_free(data);
-}
-
-STBIMG_API void STBIMG_Load_Norm(char const *filename, I4 channels, F4 *ch1, F4 *ch2, F4 *ch3, F4 *ch4) {
-    I4 width = 0, height = 0, comp = 0;
-    F4 *data = stbi_loadf(filename, &width, &height, &comp, channels);
-    // Read data to provided arrays
-    for (I4 i = 0; i<height; ++i) {
-        F4 *row = &data[i*channels*width];
-        for (I4 j = 0; j<width; ++j) {
-            switch (channels) {
-            case 4: ch4[j+width*i] = row[3+channels*j]; FALLTHRU;
-            case 3: ch3[j+width*i] = row[2+channels*j]; FALLTHRU;
-            case 2: ch2[j+width*i] = row[1+channels*j]; FALLTHRU;
-            case 1: ch1[j+width*i] = row[0+channels*j];
-            }
-        }
-    }
-    stbi_image_free(data);
 }
 
 STBIMG_API void STBIMG_Load_Raw(char const *filename, I4 channels, U1 *rawdata) {
     I4 width = 0, height = 0, comp = 0;
     U1 *data = stbi_load(filename, &width, &height, &comp, channels);
-    memcpy(rawdata, data, width*height*channels);
+    memcpy(rawdata, data, width*height*channels*sizeof(U1));
+    stbi_image_free(data);
+}
+
+STBIMG_API void STBIMG_Load_Norm_Raw(char const *filename, I4 channels, F4 *rawdata) {
+    I4 width = 0, height = 0, comp = 0;
+    F4 *data = stbi_loadf(filename, &width, &height, &comp, channels);
+    memcpy(rawdata, data, width*height*channels*sizeof(F4));
     stbi_image_free(data);
 }
 
@@ -98,6 +64,5 @@ STBIMG_API I4 STBIMG_Save_JPG_Raw(char const *filename, I4 width, I4 height, I4 
 }
 
 STBIMG_API I4 STBIMG_Save_TGA_Raw(char const *filename, I4 width, I4 height, I4 channels, U1 *rawdata) {
-    stbi_write_tga_with_rle = 0;
     return stbi_write_tga(filename, width, height, channels, rawdata);
 }

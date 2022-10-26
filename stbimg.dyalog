@@ -19,9 +19,10 @@
         s≡0:('Failed to load file ',⍵)⎕SIGNAL 22 
         ~0=⍴⍴⍺:'⍺ (# of components) must be one of 1, 2, 3, 4'⎕SIGNAL 11
         ~⍺∊1 2 3 4:'⍺ (# of components) must be one of 1, 2, 3, 4'⎕SIGNAL 11
-        r g b a←(4↑1⍴⍨⍺)×¨⊂w×h
-        type←'' '<0UTF8[] I4 >U1[] >U1[] >U1[] >U1[]'
-        (h w⍴⊢)¨⍺↑('STBIMG_Load'_C._call_ type)⍵ ⍺ r g b a
+        len←h×w×c
+        type←'' '<0UTF8[] I4 >U1[]'
+        raw←('STBIMG_Load_Raw'_C._call_ type)⍵ ⍺ len
+        ⊂⍤¯1⊢1 2 0⍉h w c⍴raw
     }
     Save←{
         rslt←⍺{
@@ -79,9 +80,10 @@
         s≡0:('Failed to load file ',⍵)⎕SIGNAL 22
         ~0=⍴⍴⍺:'⍺ (# of components) must be one of 1, 2, 3, 4'⎕SIGNAL 11
         ~⍺∊1 2 3 4:'⍺ (# of components) must be one of 1, 2, 3, 4'⎕SIGNAL 11
-        r g b a←(4↑1⍴⍨⍺)×¨⊂w×h
-        type←'' '<0UTF8[] I4 >F4[] >F4[] >F4[] >F4[]'
-        (h w⍴⊢)¨⍺↑('STBIMG_Load_Norm'_C._call_ type)⍵ ⍺ r g b a
+        len←h×w×c
+        type←'' '<0UTF8[] I4 >F4[]'
+        raw←('STBIMG_Load_Norm_Raw'_C._call_ type)⍵ ⍺ len
+        ⊂⍤¯1⊢1 2 0⍉h w c⍴raw
     }
     SaveNorm←{ 
         0::(⊃⍬⍴⎕DM)⎕SIGNAL ⎕EN
