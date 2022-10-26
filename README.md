@@ -4,15 +4,18 @@ Save and load image in Dyalog APL. Based on [stb_image](https://github.com/nothi
 ![example](image/mandelbrot.png)
 
 ## Build
+- (Optional) Get the newest `stb_image.h` and `stb_image_write.h` files from the [stb](https://github.com/nothings/stb) repository.
 - Build the shared library
 
-  On Window using MSYS2:
+  On Window using MSYS2:  
   ```
   gcc stbimg.c -Wall -Wextra -pedantic -O3 -march=native -static -shared -o stbimg.dll
   ```
+  (I heard that `-static -shared` is Windows-only.)
+  
   Put the shared library somewhere on the `PATH`.
 
-- (Optional) load the namespace script (`stbimg.dyalog`) into a `clear WS` and save it as a workspace `stbimg.dws` on the workspace search path. (Required by `mandelbrot.dyalog`)
+- (Optional) Load the namespace script (`stbimg.dyalog`) into a `clear WS` and save it as a workspace `stbimg.dws` on the workspace search path. (Required by `mandelbrot.dyalog`)
 
 ## Usage
 The namespace is in `stbimg.dyalog`.
