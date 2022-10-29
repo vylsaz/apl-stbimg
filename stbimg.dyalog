@@ -19,10 +19,10 @@
         s≡0:('Failed to load file ',⍵)⎕SIGNAL 22 
         ~0=⍴⍴⍺:'⍺ (# of components) must be one of 1, 2, 3, 4'⎕SIGNAL 11
         ~⍺∊1 2 3 4:'⍺ (# of components) must be one of 1, 2, 3, 4'⎕SIGNAL 11
-        len←h×w×c
+        len←h×w×⍺
         type←'' '<0UTF8[] I4 >U1[]'
         raw←('STBIMG_Load_Raw'_C._call_ type)⍵ ⍺ len
-        ⊂⍤¯1⊢1 2 0⍉h w c⍴raw
+        ⊂⍤¯1⊢1 2 0⍉h w ⍺⍴raw
     }
     Save←{
         rslt←⍺{
@@ -32,9 +32,9 @@
             Fjpg←'STBIMG_Save_JPG_Raw'
             Ftga←'STBIMG_Save_TGA_Raw'
             Ext←{{1↓⍵/⍨∨\⌽<\⌽⍵='.'}1↓(⊢↓⍨'\/'∊⍨⊃)⍵/⍨∨\⌽<\⌽(1↑⍨≢⍵)∨'\/'∊⍨⍵}
-            Raw←{,1 3 0 2⍉(⊢⍴⍨1,⍴)↑⍵}
             x←¯1⎕C Ext ⍺
-            y←,⊆⍵ ⋄ r←Raw y ⋄ h w←⍴⊃y ⋄ c←≢y  
+            Raw←{,1 3 0 2⍉,[¯0.5]⍵}
+            y←↑,⊆⍵ ⋄ r←Raw y ⋄ c h w←⍴y  
             x≡'png':(Fpng _C._call_ type)⍺ w h c r
             x≡'bmp':(Fbmp _C._call_ type)⍺ w h c r 
             (x≡'jpg')∨x≡'jpeg':(Fjpg _C._call_ type)⍺ w h c r
@@ -80,10 +80,10 @@
         s≡0:('Failed to load file ',⍵)⎕SIGNAL 22
         ~0=⍴⍴⍺:'⍺ (# of components) must be one of 1, 2, 3, 4'⎕SIGNAL 11
         ~⍺∊1 2 3 4:'⍺ (# of components) must be one of 1, 2, 3, 4'⎕SIGNAL 11
-        len←h×w×c
+        len←h×w×⍺
         type←'' '<0UTF8[] I4 >F4[]'
         raw←('STBIMG_Load_Norm_Raw'_C._call_ type)⍵ ⍺ len
-        ⊂⍤¯1⊢1 2 0⍉h w c⍴raw
+        ⊂⍤¯1⊢1 2 0⍉h w ⍺⍴raw
     }
     SaveNorm←{ 
         0::(⊃⍬⍴⎕DM)⎕SIGNAL ⎕EN
