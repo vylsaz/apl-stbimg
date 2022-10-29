@@ -1,26 +1,48 @@
 :Namespace mandelbrot
 ⍝ usage: mandelbrot.('filepath'Show Calc width,height)
+  ⎕IO ⎕ML←0 1  
   ⎕CY'stbimg' ⍝ requires a workspace
   #.('DRC'⎕CY'conga')
   #.⎕CY'isolate'           
-  #.isolate.ynys.isoStart ⍬   
-  ⎕IO ⎕ML←0 1
-  Calc←{⍺←32 
+  #.isolate.ynys.isoStart ⍬          
+  ⍝ https://www.dyalog.com/blog/2014/08/isolated-mandelbrot-set-explorer/
+  ∇ r←iter Mand right
+    ;iter;w;h;l;b;dl;db;dom;clr;idc;cnt;zed;esc;pal
+    w h dl db l b←right
+    dom←,(⌽¯11○b+db×⍳h)∘.+l+dl×⍳w
+    clr←{0}¨dom
+    idc←⍳≢clr
+    zed←{0}¨dom
+    :For cnt :In ⍳iter
+      esc←2<|zed
+      clr[esc/idc]←cnt
+      idc←idc/⍨~esc
+      :If 0∊⍴idc ⋄ :Leave ⋄ :EndIf
+      zed←dom[idc]+×⍨zed/⍨~esc
+    :EndFor            
+    clr[idc]←iter        
+    r←iter÷⍨clr
+  ∇ 
+  _Calc_←{
+    _←#.isolate.Reset 0
+    p←#.isolate.Config 'processors' 
+    w h←⍵ 
+    (l b)(r t)←9 11∘○¨⍺⍺ ⍵⍵
+    dl db←w h÷⍨r t-l b 
+    rows←p{¯2-/⌈⍵,⍨(⍳⍺)×⍵÷⍺}h
+    buts←b+db×1↓⌽0,+\rows
+    args←↓w,rows,dl,db,l,⍪buts
+    h w⍴∊⍺ Mand#.isolate.llEach args
+  } 
+  Calc←{⍺←32
     ⍝ ⍺←iterations
     ⍝ ⍵←width,height
     ⍝ r←matrix of ratio ⋄ (⍴r)≡height,width
-    _←#.isolate.Reset 0
-    p←#.isolate.Config 'processors' 
-    dom←¯2J¯1{
-      ⍺⍺+⊖⊃∘.{⍵+¯11○⍺}⍨/(⍳¨⍵)×⍵÷⍨-/¨9 11○⊂⍵⍵ ⍺⍺
-    }1J1⊢⍵
-    par←p{↓⍵⍴⍨⍺(⊣,⌈⍤÷⍨)≢,⍵}dom
-    (⍴dom)⍴∊⍺{⍺÷⍨⍺{iter←⍺
-      ⊃⍵{i z←⍵ ⋄ (1+i),⍺+×⍨z}⍣{i z←⍺ ⋄ (iter≤i)∨2<|z}0 0
-    }¨⍵}#.isolate.llEach par
+    ⍺(¯2j¯1 _Calc_ 1j1)⍵
   }
-  Show←{
+  Show←{                  
     stbimg.(Show ⍺ SaveNorm 1-⍵)
   }
 :EndNamespace
+
 
