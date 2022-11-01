@@ -41,7 +41,7 @@
     ⍺(¯2j¯1 _Calc_ 1j1)⍵
   }
   Show←{                  
-    stbimg.(Show ⍺ SaveNorm 1-⍵)
+    stbimg.(Show ⍺ SaveLin 1-⍵)
   }
 :EndNamespace
 
