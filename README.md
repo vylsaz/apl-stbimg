@@ -15,17 +15,18 @@ Save and load image in Dyalog APL. Based on [stb_image](https://github.com/nothi
   
   Put the shared library somewhere on the `PATH`.
 
-- (Optional) Load the namespace script (`stbimg.dyalog`) into a `clear WS` and save it as a workspace `stbimg.dws` on the workspace search path. (Required by `mandelbrot.dyalog`)
+- (Optional) Load the class script (`stbimg.dyalog`) into a `clear WS` and save it as a workspace `stbimg.dws` on the workspace search path. (Required by `mandelbrot.dyalog`)
 
 ## Usage
-The namespace is in `stbimg.dyalog`.
+The namespace/class stbimg is in `stbimg.dyalog`.
 
-```⎕IO←0``` implied.  
-The "\*Norm" variants of functions expect color to be 0-1 floating point numbers.  
+```⎕IO←0```  
+The "\*Norm" variants of functions expect color to be 0-1 floating point numbers. The "\*Lin" variants are their linear version.  
 Otherwise, color is in 0-255 integer value.
 
 ```apl
 R←{X} stbimg.Load Y
+R←{X} stbimg.LoadLin Y
 R←{X} stbimg.LoadNorm Y
 ```
 Y is the path of a file whose format is [supported by stb_image](https://github.com/nothings/stb/blob/master/stb_image.h#L19).  
@@ -43,6 +44,7 @@ The shape of matrices in R equals to `height,width` of the image.
 
 ```apl
 X←X stbimg.Save Y
+X←X stbimg.SaveLin Y
 X←X stbimg.SaveNorm Y
 ```
 Y is either a simple matrix for greyscale, or a vector of matrices. `≢⊆X` is the number of channels of the resulting image.  
@@ -50,6 +52,7 @@ X is the path. Currently, the supported extensions are .png, .bmp, .jpg (or .jpe
 
 ```apl
 stbimg.Disp Y
+stbimg.DispLin Y
 stbimg.DispNorm Y
 ```
 Y is either a simple matrix for greyscale, or a vector of matrices. `≢⊆X` is the number of channels of the resulting image. The alpha channel is ignored.  
@@ -79,6 +82,6 @@ See `mandelbrot.dyalog`. (A dialog about network access might show up -- that is
 ## License
 `stbimg.c`, `stbimg.dyalog` and `mandelbrot.dyalog` are under MIT license.
 
-`stb_image.h` and `stb_image_write.h` are in public domain.
+`stb_image.h` and `stb_image_write.h` are in the public domain.
 
 WIP
