@@ -21,6 +21,7 @@ Save and load image in Dyalog APL. Based on [stb_image](https://github.com/nothi
 The namespace/class stbimg is in `stbimg.dyalog`.
 
 ```⎕IO←0```  
+
 The "\*Norm" variants of functions expect color to be 0-1 floating point numbers. The "\*Lin" variants are their linear version.  
 Otherwise, color is in 0-255 integer value.
 
@@ -39,24 +40,21 @@ X, if present, is one of 1, 2, 3 or 4. It represents the number of color channel
 | 4 | rgb and alpha |
 
 If X is not present, the number of channels is decided by the image.  
-R is a vector of matrices. Length of R equals to the number of channels. Thus if X is present, `X≡≢R`.  
+R is a vector of matrices representing colors. Length of R equals to the number of channels. Thus if X is present, `X≡≢R`.  
 The shape of matrices in R equals to `height,width` of the image.
 
 ```apl
+R←stbimg.FromLin Y
+R←stbimg.FromNorm Y
+```
+Y is either a simple matrix for greyscale, or a vector of matrices.  
+R is the corresponding 0-255 integer values.
+
+```apl
 X←X stbimg.Save Y
-X←X stbimg.SaveLin Y
-X←X stbimg.SaveNorm Y
 ```
 Y is either a simple matrix for greyscale, or a vector of matrices. `≢⊆X` is the number of channels of the resulting image.  
 X is the path. Currently, the supported extensions are .png, .bmp, .jpg (or .jpeg) and .tga.
-
-```apl
-stbimg.Disp Y
-stbimg.DispLin Y
-stbimg.DispNorm Y
-```
-Y is either a simple matrix for greyscale, or a vector of matrices. `≢⊆X` is the number of channels of the resulting image. The alpha channel is ignored.  
-The image is displayed on a window implemented in Dyalog GUI object.
 
 ```apl
 R←stbimg.Info Y
@@ -71,10 +69,18 @@ R is a length 4 vector.
 | R\[3\] | the number of channels (one of 1, 2, 3 or 4). Refer to the previous section of `stbimg.Load`. |
 
 ```apl
+stbimg.Disp Y
+stbimg.DispHTML Y
+```
+Y is either a simple matrix for greyscale, or a vector of matrices. `≢⊆X` is the number of channels of the resulting image. The alpha channel is ignored.  
+The image is displayed on a window implemented in Dyalog GUI object "form" or (for DispHTML) "HTMLRenderer".
+
+```apl
 stbimg.Show Y
+stbimg.ShowHTML Y
 ```
 Y is the path of a file whose format is jpg, bmp or png.  
-The image is displayed on a window implemented in Dyalog GUI object.
+The image is displayed on a window implemented in Dyalog GUI object "form" or (for ShowHTML) "HTMLRenderer".
 
 ## Example
 See `mandelbrot.dyalog`. (A dialog about network access might show up -- that is due to `isolate`.)
