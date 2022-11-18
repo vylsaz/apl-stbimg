@@ -6,7 +6,7 @@
   #.⎕CY'isolate'           
   #.isolate.ynys.isoStart ⍬          
   ⍝ https://www.dyalog.com/blog/2014/08/isolated-mandelbrot-set-explorer/
-  ∇ clr←iter Mand right;iter;w;h;l;b;dl;db;dom;idc;cnt;zed;esc;pal
+  ∇ clr←iter Mand right;w;h;l;b;dl;db;dom;idc;cnt;zed;esc;pal
     w h dl db l b←right
     dom←,(⌽¯11○b+db×⍳h)∘.+l+dl×⍳w
     clr←{0}¨dom
@@ -45,11 +45,14 @@
     ⍝ r←matrix of ratio ⋄ (⍴r)≡height,width
     clr←⍺(¯2j¯1 _Calc_ 1j1)⍵
     pal←Palette ⍺
-    pal[;clr]
+    (⊂⍤¯1)pal[;clr]
   }
   Show←{   
-    stbimg.(ShowHTML ⍺ Save ⊂⍤¯1⊢⍵)
+    stbimg.(ShowHTML ⍺ Save ⍵)
   }
+  ∇ Demo
+    stbimg.DispHTML Calc 1200 800
+  ∇
 :EndNamespace
 
 
