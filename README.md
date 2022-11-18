@@ -25,7 +25,7 @@ Save and load image in Dyalog APL. Based on [stb_image](https://github.com/nothi
 ## Usage
 The namespace/class stbimg is in `stbimg.dyalog`.
 
-```⎕IO←0```  
+The documentation assumes ```⎕IO ⎕ML←0 1```. `stbimg` is ⎕IO and ⎕ML insensitive (the class has its ⎕IO and ⎕ML). 
 
 The "Norm" variants of functions expect color to be 0-1 floating point numbers. The "Lin" variants are their linear version.  
 Otherwise, color is in 0-255 integer value.
