@@ -143,6 +143,8 @@ For halftone:
 
 On Windows, a dialog about network access might show up -- that can be (a) mandelbrot uses `isolate`; (b) halftone.Demo downloads an image from the internet.
 
+![screenshot of a jupyter notebook](image/screenshot.png)
+
 ## License
 `stbimg.c`, `stbimg.dyalog`, `halftone.dyalog` and `mandelbrot.dyalog` are under MIT license.
 
