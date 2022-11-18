@@ -125,7 +125,7 @@ R←X stbimg.GammaCorr Y
 ```
 Y is either a simple matrix for greyscale, or a vector of matrices.  
 X is a gamma value.  
-R is the result of `Y*X`, but the alpha channel is not changed.
+R is the result of `Y*X` (Y raised to the power of X), but the alpha channel is not changed.
 
 ## Example
 See `mandelbrot.dyalog` and `halftone.dyalog`.
