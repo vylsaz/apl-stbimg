@@ -1,12 +1,11 @@
-:Namespace halftone
+﻿:Namespace halftone
   ⎕IO ⎕ML←0 1
-  ⎕SE.SALT.Load'HttpCommand'
   ⎕CY'stbimg'
-  
-  ⍝ stbimg can't save 1-bit images, only 8 bits per channel. 
-  ⍝ still,it should be fun to look at. 
 
-  ToLuminance←{ 
+  ⍝ stbimg can't save 1-bit images, only 8 bits per channel.
+  ⍝ still, it should be fun to look at.
+
+  ToLuminance←{
     ⍝ ⍵ ←→ normalized r g b
     ⍝ r ←→ normalized luminance/grayscale
     ⍝ height width ≡ ⍴r
@@ -16,7 +15,7 @@
   ∇ r←(weight _ErrorDiffusion_ coords) img;len;shp;o;i;p;e;n;m
     r←,img ⋄ len←≢r
     shp←⍴img
-    o←(shp⊥⊢)¨coords    
+    o←(shp⊥⊢)¨coords
     :For i :In ⍳len       ⍝ this is a very imperative algorithm.
       p←r[i]
       r[i]←p>0.5          ⍝ apply threshold
@@ -38,8 +37,8 @@
     weight←(⊢÷+/)7 3 5 1
     coords←2↓,-∘0 1¨⍳2 3
     (weight _ErrorDiffusion_ coords)⍵
-  } 
-  
+  }
+
   ⍝ https://beyondloom.com/blog/dither.html
   Atkinson←{
     weight←8÷⍨6⍴1
@@ -48,7 +47,7 @@
   }
 
   RandomDither←{
-    w←(⍺,⍨-⍺) (16808⌶) 'Uniform' (⍴⍵)
+    w←(⍺,⍨-⍺)(16808⌶)'Uniform'(⍴⍵)
     0.5<w+⍵
   }
 
@@ -56,38 +55,42 @@
     k←9÷⍨3 3⍴1
     k+.×⍨⍥(,⍤2)({⍵}⌺3 3)⍵
   }
-  
-  ∇ Demo;P;g;i;n;y;r;h
-    P←{'<p>',⍵,'</p>'}  
-    ⊢g←#.HttpCommand.Get'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'
-    i←stbimg.(rgb LoadMem ⊢)g.Data     
-    h←P⎕←'original'
-    h,←stbimg.EmitHTML i
 
+  ∇ Demo;P;g;i;n;y;r;h
+    ⍝ please load it manually, I don't know how to make it work.
+    :If 0=⎕NC'#.HttpCommand'
+      ('Please',(⎕UCS 13),'      ]load HttpCommand')⎕SIGNAL 6
+    :EndIf
+    P←{'<p>',⍵,'</p>'}
+    ⊢g←#.HttpCommand.Get'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'
+    i←stbimg.(rgb LoadMem⊢)g.Data
+    h←P ⎕←'original'
+    h,←stbimg.EmitHTML i
+     
     ⍝ it's too slow for larger images...
     n←stbimg.ToNorm i
     y←ToLuminance n
-    r←Atkinson y 
-    h,←P⎕←'error diffusion (grayscale)'
-    h,←stbimg.(EmitHTML∘FromNorm)r 
-    
+    r←Atkinson y
+    h,←P ⎕←'error diffusion (grayscale)'
+    h,←stbimg.(EmitHTML∘FromNorm)r
+     
     ⍝ we can generalize this to all three channels
     r←Floyd_Steinberg¨n
-    h,←P⎕←'error diffusion (rgb)'
-    h,←stbimg.(EmitHTML∘FromNorm)r 
-    
+    h,←P ⎕←'error diffusion (rgb)'
+    h,←stbimg.(EmitHTML∘FromNorm)r
+     
     ⍝ what if we filter out the noisy parts?
     ⍝ i.e. take the average in a window
-    ⍝ this is how halftoning works, because 
+    ⍝ this is how halftoning works, because
     ⍝ human eyes act like a low pass filter
-    h,←P⎕←'low pass filter' 
-    h,←stbimg.(EmitHTML∘FromNorm)LowPass¨r 
-    
+    h,←P ⎕←'low pass filter'
+    h,←stbimg.(EmitHTML∘FromNorm)LowPass¨r
+     
     ⍝ much faster, looks not as good
-    r←0.1 RandomDither y      
-    h,←P⎕←'random dither'
-    h,←stbimg.(EmitHTML∘FromNorm)r       
-    
-    'hr'⎕WC'HTMLRenderer' h
+    r←0.1 RandomDither y
+    h,←P ⎕←'random dither'
+    h,←stbimg.(EmitHTML∘FromNorm)r
+   
+    'hr'⎕WC'HTMLRenderer'h
   ∇
 :EndNamespace
