@@ -100,6 +100,20 @@ Y is the path of a file whose format is jpg, bmp or png.
 The image is displayed on a window implemented in Dyalog GUI object "Form" or (for ShowHTML) "HTMLRenderer" (cross-platform).
 
 ```apl
+R←X stbimg.Resize Y
+```
+Y is either a simple matrix for greyscale, or a vector of matrices.  
+X is the new (height,width) of the image. If this order seems counter-intuitive, think of `⍴` or reshape.  
+R is the resized image. R is either a simple matrix for greyscale, or a vector of matrices, and the depth is the same as Y.
+
+```apl
+R←X stbimg.Scale Y
+```
+Y is either a simple matrix for greyscale, or a vector of matrices.  
+X is the scale. The new (height,width) is the integer part of X times (height,width) of the image.  
+R is the resized image. R is either a simple matrix for greyscale, or a vector of matrices, and the depth is the same as Y.
+
+```apl
 R←stbimg.FromLin Y
 R←stbimg.FromNorm Y
 ```
