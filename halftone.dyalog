@@ -56,6 +56,19 @@
     k+.×⍨⍥(,⍤2)({⍵}⌺3 3)⍵
   }
 
+  Bayer←{
+    b←2 2⍴0 2 3 1
+    ⍵≡0:b
+    ,⍤2,[0 1]0 2 1 3⍉b∘.+4×∇⍵-1
+  }
+
+  ∇ r←lvl (Gen _orderedDither) img;pre;ph;pw;ih;iw
+    pre←(1∘+÷×/∘⍴) Gen lvl
+    ph pw←⍴pre
+    ih iw←⍴img
+    r←1<img+pre[ph|⍳ih;pw|⍳iw] ⍝ wrapped indexing
+  ∇
+
   ∇ Demo;P;g;i;n;y;r;h
     ⍝ please load it manually, I don't know how to make it work.
     :If 0=⎕NC'#.HttpCommand'
@@ -66,10 +79,21 @@
     i←stbimg.(rgb LoadMem⊢)g.Data
     h←P ⎕←'original'
     h,←stbimg.EmitHTML i
-     
-    ⍝ it's too slow for larger images...
+    
     n←stbimg.ToNorm i
     y←ToLuminance n
+
+    ⍝ faster, but looks not that good
+    r←0.1 RandomDither y
+    h,←P ⎕←'random dither'
+    h,←stbimg.(EmitHTML∘FromNorm)r
+    
+    ⍝ uses Bayer matrix
+    r←2 (Bayer _orderedDither) y
+    h,←P ⎕←'ordered dither'
+    h,←stbimg.(EmitHTML∘FromNorm)r
+     
+    ⍝ it's too slow for larger images...    
     r←Atkinson y
     h,←P ⎕←'error diffusion (grayscale)'
     h,←stbimg.(EmitHTML∘FromNorm)r
@@ -85,11 +109,6 @@
     ⍝ human eyes act like a low pass filter
     h,←P ⎕←'low pass filter'
     h,←stbimg.(EmitHTML∘FromNorm)LowPass¨r
-     
-    ⍝ much faster, looks not as good
-    r←0.1 RandomDither y
-    h,←P ⎕←'random dither'
-    h,←stbimg.(EmitHTML∘FromNorm)r
    
     'hr'⎕WC'HTMLRenderer'h
   ∇
