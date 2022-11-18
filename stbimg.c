@@ -1,6 +1,10 @@
 #include <stdlib.h>
+
+#if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function" 
+#endif
+
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_STATIC
 #define STBI_WINDOWS_UTF8
@@ -9,7 +13,14 @@
 #define STB_IMAGE_WRITE_STATIC
 #define STBIW_WINDOWS_UTF8
 #include "stb_image_write.h"
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#define STB_IMAGE_RESIZE_STATIC
+#include "stb_image_resize.h"
+
+#if defined(__GNUC__)
 #pragma GCC diagnostic pop
+#endif
+
 #include <inttypes.h>
 
 #ifndef STBIMG_EXPORTS
@@ -30,8 +41,6 @@ typedef uint8_t  U1;
 typedef uint16_t U2;
 typedef int32_t  I4;
 typedef float    F4;
-
-typedef size_t   Usz;
 
 // notice that it uses I4 (not a big problem)
 STBIMG_API I4 STBIMG_Info(char const *filename, I4 *width, I4 *height, I4 *channels) {
@@ -60,6 +69,18 @@ STBIMG_API void STBIMG_Load_U2(char const *filename, I4 channels, U2 *rawdata) {
     stbi_image_free(data);
 }
 
+STBIMG_API I4 STBIMG_Info_Mem(U1 const *mem, I4 len, I4 *width, I4 *height, I4 *channels) {
+    *width = 0; *height = 0; *channels = 0;
+    return stbi_info_from_memory(mem, len, width, height, channels);
+}
+
+STBIMG_API void STBIMG_Load_U1_Mem(U1 const *mem, I4 len, I4 channels, U1 *rawdata) {
+    I4 width = 0, height = 0, comp = 0;
+    U1 *data = stbi_load_from_memory(mem, len, &width, &height, &comp, channels);
+    memcpy(rawdata, data, width*height*channels*sizeof(U1));
+    stbi_image_free(data);
+}
+
 STBIMG_API I4 STBIMG_Save_PNG(char const *filename, I4 width, I4 height, I4 channels, U1 *rawdata) {
     return stbi_write_png(filename, width, height, channels, rawdata, channels*width*sizeof(U1));
 }
@@ -76,31 +97,17 @@ STBIMG_API I4 STBIMG_Save_TGA(char const *filename, I4 width, I4 height, I4 chan
     return stbi_write_tga(filename, width, height, channels, rawdata);
 }
 
-STBIMG_API I4 STBIMG_Copy_UTF8(U1 *src, I4 len, char *dst) {
-    if (src==NULL) {return 0;}
-    memcpy(dst, src, len*sizeof(U1));
-    free(src);
-    return 1;
-}
-
-static U1 *Base64_Encode(U1 *mem, I4 len, I4 *out_len);
-
-STBIMG_API U1 *STBIMG_Base64_PNG(I4 width, I4 height, I4 channels, U1 *rawdata, I4 *out_len) {
-    I4 len = 0;
-    U1 *mem = stbi_write_png_to_mem(rawdata, channels*width*sizeof(U1), width, height, channels, &len);
-    U1 *out = Base64_Encode(mem, len, out_len);
-    if (mem!=NULL) {STBI_FREE(mem);}
-    return out;
+STBIMG_API U1 *STBIMG_Save_PNG_Mem(I4 width, I4 height, I4 channels, U1 *rawdata, I4 *out_len) {
+    return stbi_write_png_to_mem(rawdata, channels*width*sizeof(U1), width, height, channels, out_len);
 }
 
 // https://stackoverflow.com/a/41094722
-U1 *Base64_Encode(U1 *mem, I4 len, I4 *out_len) {
+static I4 Base64_Encode(U1 const *mem, I4 len, U1 *out, I4 nchars) {
     static U1 const charset[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    I4 nchars = 4*((len+2)/3);
-    if (nchars < len) {return NULL;}
 
-    U1 *out = calloc(nchars, sizeof(U1));
+    if (nchars<len) {return 0;}
+
     U1 const *end = mem+len;
     U1 const *in  = mem;
     U1 *pos = out;
@@ -124,6 +131,23 @@ U1 *Base64_Encode(U1 *mem, I4 len, I4 *out_len) {
         }
         *pos++ = '=';
     }
-    *out_len = nchars;
-    return out;
+    return(I4)(nchars==pos-out);
 }
+
+STBIMG_API I4 STBIMG_Encode_64(U1 *mem, I4 len, U1 *out, I4 nchars) {
+    I4 const r = Base64_Encode(mem, len, out, nchars);
+    if (mem!=NULL) {STBIW_FREE(mem);}
+    return r;
+}
+
+STBIMG_API I4 STBIMG_Resize_U1(
+    U1 *input,  I4 in_width,  I4 in_height, 
+    U1 *output, I4 out_width, I4 out_height, I4 channels
+) {
+    return stbir_resize_uint8(
+        input,  in_width,  in_height,  0, 
+        output, out_width, out_height, 0,
+        channels
+    );
+}
+
