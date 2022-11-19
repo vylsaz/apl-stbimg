@@ -75,9 +75,11 @@
       ('Please',(⎕UCS 13),'      ]load HttpCommand')⎕SIGNAL 6
     :EndIf
     P←{'<p>',⍵,'</p>'}
-    ⊢g←#.HttpCommand.Get'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'
+    h←'<title>demo</title>'
+    ⎕←g←#.HttpCommand.Get'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'
+    
     i←stbimg.(rgb LoadMem⊢)g.Data
-    h←P ⎕←'original'
+    h,←P ⎕←'original'
     h,←stbimg.EmitHTML i
     
     n←stbimg.ToNorm i
