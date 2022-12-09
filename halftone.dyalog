@@ -59,15 +59,16 @@
   Bayer←{
     b←2 2⍴0 2 3 1
     ⍵≡0:b
-    ,⍤2,[0 1]0 2 1 3⍉b∘.+4×∇⍵-1
+    ,[0 1],[2 3]0 2 1 3⍉b∘.+4×∇⍵-1 ⍝ a generalized Kronecker product
+    ⍝ - outer product but with rank of the left argument
   }
 
-  ∇ r←lvl (Gen _orderedDither) img;pre;ph;pw;ih;iw
-    pre←(1∘+÷×/∘⍴) Gen lvl
-    ph pw←⍴pre
-    ih iw←⍴img
-    r←1<img+pre[ph|⍳ih;pw|⍳iw] ⍝ wrapped indexing
-  ∇
+  _orderedDither←{
+    p←(1∘+÷×/∘⍴) ⍺⍺ ⍺    ⍝ pre-calculated weight
+    (ph pw)←⍴p
+    (ih iw)←⍴⍵
+    1<⍵+p[ph|⍳ih;pw|⍳iw] ⍝ wrapped indexing, then apply threshold
+  }
 
   ∇ Demo;P;g;i;n;y;r;h
     ⍝ please load it manually, I don't know how to make it work.

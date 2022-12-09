@@ -13,7 +13,7 @@
   ∇ rslt←(func _Call_ type) args;r;p;call
     :Access Private Shared      
     :If 3≠call_ns.⎕NC func 
-      r p←type
+      (r p)←type
       call←r,' ',shared_lib,'|',func,' ',p
       call_ns.⎕NA call
     :EndIf 
@@ -31,7 +31,7 @@
 
   ∇ data←info (data_type _Load) name;s;w;h;ch;len;type;func
     :Access Private Shared
-    s w h ch←info
+    (s w h ch)←info
     :If s≡0 ⋄ ('Failed to load file ',name)⎕SIGNAL 22 ⋄ :EndIf
     :If ~0=⍴⍴ch
     :OrIf ~ch∊1 2 3 4
@@ -47,21 +47,21 @@
   
   ∇ data←{ch} Load name;s;w;h;n
     :Access Public Shared
-    s w h n←Info name
+    (s w h n)←Info name
     :If 0=⎕NC'ch' ⋄ ch←n ⋄ :EndIf
     data←s w h ch('U1'_Load)name
   ∇
 
   ∇ data←{ch} LoadLin name;s;w;h;n
     :Access Public Shared
-    s w h n←Info name
+    (s w h n)←Info name
     :If 0=⎕NC'ch' ⋄ ch←n ⋄ :EndIf
     data←s w h ch('F4'_Load)name
   ∇
 
   ∇ data←{ch} LoadNorm name;s;w;h;n
     :Access Public Shared
-    s w h n←Info name
+    (s w h n)←Info name
     :If 0=⎕NC'ch' ⋄ ch←n ⋄ :EndIf
     data←65535÷⍨s w h ch('U2'_Load)name
   ∇ 
@@ -80,7 +80,7 @@
   ∇ data←{ch} LoadMem mem;len;s;w;h;n;olen;type
     :Access Public Shared
     len←≢mem
-    s w h n←InfoMem mem
+    (s w h n)←InfoMem mem
     :If 0=⎕NC'ch' ⋄ ch←n ⋄ :EndIf
     
     :If s≡0 ⋄ ('Failed to load from buffer')⎕SIGNAL 22 ⋄ :EndIf
@@ -105,7 +105,7 @@
     Ext←{1↓2⊃1⎕NPARTS⍵}
     x←¯1⎕C Ext name
         
-    y←↑,⊆data ⋄ r←Raw y ⋄ c h w←⍴y  
+    y←↑,⊆data ⋄ r←Raw y ⋄ (c h w)←⍴y  
     :If ~c∊1 2 3 4
       '⍺ (# of components) must be one of 1, 2, 3, 4'⎕SIGNAL 11
     :EndIf  
@@ -127,38 +127,40 @@
     :EndIf
   ∇
 
-  ∇ output←size Resize input;oh;ow;y;r;c;ih;iw;olen;type;ok
-    :Access Public Shared
-    oh ow←size
-    y←↑,⊆input ⋄ r←Raw y ⋄ c ih iw←⍴y
+  PrivResize←{
+    (oh ow)←⍺ 
+    (c ih iw)←⍴⍵
     olen←c×oh×ow
+    r←Raw ⍵
 
     type←'I4' '<U1[] I4 I4 >U1[] I4 I4 I4'
-    ok output←('STBIMG_Resize_U1'_Call_ type)r iw ih olen ow oh c
-    :If ~ok ⋄ 'Failed to resize'⎕SIGNAL 11 ⋄ :EndIf
-    output←(⊂⍤¯1)c oh ow Pack output
+    (ok output)←('STBIMG_Resize_U1'_Call_ type)r iw ih olen ow oh c
+    
+    ~ok:'Failed to resize'⎕SIGNAL 11
+    (⊂⍤¯1)c oh ow Pack output
+  }
+
+  ∇ output←size Resize input;y
+    :Access Public Shared
+    y←↑,⊆input
+    output←size PrivResize y
   ∇
   
-  ∇ output←ratio Scale input;oh;ow;y;r;c;ih;iw;olen;type;ok
+  ∇ output←ratio Scale input;y;size
     :Access Public Shared
-    y←↑,⊆input ⋄ r←Raw y ⋄ c ih iw←⍴y
-    oh ow←⌊ratio×ih iw 
-    olen←c×oh×ow
-
-    type←'I4' '<U1[] I4 I4 >U1[] I4 I4 I4'
-    ok output←('STBIMG_Resize_U1'_Call_ type)r iw ih olen ow oh c
-    :If ~ok ⋄ 'Failed to resize'⎕SIGNAL 11 ⋄ :EndIf
-    output←(⊂⍤¯1)c oh ow Pack output
+    y←↑,⊆input
+    size←⌊ratio×1↓⍴y
+    output←size PrivResize y 
   ∇
   
   ∇ r←Squeeze size;w;h;big;small
     :Access Private Shared
-    h w←size
+    (h w)←size
     big←1280 720 ⋄ small←400 400
     :If ∨/w h>big
-      w h←⌊w h×⌊/big÷w h 
+      (w h)←⌊w h×⌊/big÷w h 
     :ElseIf ∨/w h<small 
-      w h←⌊w h×⌈/small÷w h 
+      (w h)←⌊w h×⌈/small÷w h 
     :Endif 
     r←w h
   ∇           
@@ -166,7 +168,7 @@
   ∇ Disp data;pixels;w;h
     :Access Public Shared
     pixels←256⊥↑3⍴(⊢↓⍨∘-2≡≢)⊆data
-    w h←Squeeze ⍴pixels
+    (w h)←Squeeze ⍴pixels
     '∆f'⎕WC'Form'('Caption' 'Disp')('Coord' 'RealPixel')('Size'(h,w))
     '∆f.bit'⎕WC'Bitmap'('CBits' pixels)
     '∆f.img'⎕WC'Image'(0 0)('Picture' '∆f.bit')('Size'(h,w))
@@ -174,9 +176,9 @@
 
   ∇ Show name;s;w;h;c 
     :Access Public Shared
-    s w h c←Info name
+    (s w h c)←Info name
     :If s≡0 ⋄ ('Failed to load file ',name)⎕SIGNAL 22 ⋄ :EndIf 
-    w h←Squeeze h w 
+    (w h)←Squeeze h w 
     '∆f'⎕WC'Form'('Caption'name)('Coord' 'RealPixel')('Size'(h,w))
     '∆f.bit'⎕WC'Bitmap'('File' name)
     '∆f.img'⎕WC'Image'(0 0)('Picture' '∆f.bit')('Size'(h,w))
@@ -186,17 +188,17 @@
     :Access Public Shared 
     :If 0=⎕NC'limit' ⋄ limit←0 ⋄ :EndIf
     
-    y←↑,⊆data ⋄ r←Raw y ⋄ c h w←⍴y 
+    y←↑,⊆data ⋄ r←Raw y ⋄ (c h w)←⍴y 
     :If ~c∊1 2 3 4
       '⍺ (# of components) must be one of 1, 2, 3, 4'⎕SIGNAL 11
     :EndIf
 
     type←'P' 'I4 I4 I4 <U1[] >I4'
-    ptr len←('STBIMG_Save_PNG_Mem'_Call_ type)w h c r 0
+    (ptr len)←('STBIMG_Save_PNG_Mem'_Call_ type)w h c r 0
     
     nchars←4×⌊3÷⍨2+len
     type←'I4' 'P I4 >UTF8[] I4'
-    ok enc←('STBIMG_Encode_64'_Call_ type)ptr len nchars nchars
+    (ok enc)←('STBIMG_Encode_64'_Call_ type)ptr len nchars nchars
     :If ~ok ⋄ 'Failed to encode image'⎕SIGNAL 6 ⋄ :EndIf
     
     URI←'data:image/png;base64,',enc
