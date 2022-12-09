@@ -1,5 +1,5 @@
 # apl-stbimg
-Save and load image in Dyalog APL. Based on [stb_image](https://github.com/nothings/stb).
+Save, load and resize image in Dyalog APL. Based on [stb_image](https://github.com/nothings/stb).
 
 ![example](image/mandelbrot.png)
 
