@@ -7,7 +7,7 @@ Save and load image in Dyalog APL. Based on [stb_image](https://github.com/nothi
 - (Optional) Get the newest `stb_image.h`, `stb_image_resize.h` and `stb_image_write.h` files from the [stb](https://github.com/nothings/stb) repository.
 - Build the shared library
 
-  On Windows using MSYS2:
+  On Windows using MinGW-w64:
   ```
   gcc stbimg.c -Wall -Wextra -pedantic -O3 -march=native -static -shared -o stbimg.dll
   ```
