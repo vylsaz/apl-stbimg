@@ -157,11 +157,9 @@ For halftone:
 
 On Windows, a dialog about network access might show up -- that can be (a) mandelbrot uses `isolate`; (b) halftone.Demo downloads an image from the internet.
 
-![screenshot of a jupyter notebook](image/screenshot.png)
+![screenshot of a jupyter notebook](image/notebook.png)
 
 ## License
 `stbimg.c`, `stbimg.dyalog`, `halftone.dyalog` and `mandelbrot.dyalog` are under MIT license.
 
-`stb_image.h`, `stb_image_resize.h` and `stb_image_write.h` are in the public domain.
-
-WIP
+`stb_image.h`, `stb_image_resize.h` and `stb_image_write.h` are in the public domain. Big thanks to all contributors of the stb library.
