@@ -7,18 +7,20 @@ Save, load and resize image in Dyalog APL. Based on [stb_image](https://github.c
 - (Optional) Get the newest `stb_image.h`, `stb_image_resize.h` and `stb_image_write.h` files from the [stb](https://github.com/nothings/stb) repository.
 - Build the shared library
 
-  On Windows using MinGW-w64:
-  ```
-  gcc stbimg.c -Wall -Wextra -pedantic -O3 -march=native -static -shared -o stbimg.dll
-  ```
+  - Windows using MinGW-w64:
+    ```
+    gcc stbimg.c -Wall -Wextra -pedantic -O3 -march=native -static -shared -o stbimg.dll
+    ```
+    Put the shared library somewhere [⎕NA](https://help.dyalog.com/18.2/Content/Language/System%20Functions/na.htm) knows.
   
-  On Linux:
-  ```
-  gcc stbimg.c -Wall -Wextra -pedantic -O3 -march=native -fPIC -shared -o stbimg.so
-  ```
-  
-- Change the field `shared_lib` in `stbimg.dyalog` to suitable name if not on Windows.  
-  Put the shared library somewhere [⎕NA](https://help.dyalog.com/18.2/Content/Language/System%20Functions/na.htm) knows. Or, alternatively, edit `shared_lib` to the specific path.
+  - Linux:
+    ```
+    gcc stbimg.c -Wall -Wextra -pedantic -O3 -march=native -fPIC -shared -o stbimg.so
+    ```
+    Or use an APL script to compile and install the shared library under $DYALOG/lib:
+    ```
+    sudo dyalogscript install.apls
+    ```
 
 - (Optional) Load the class script (`stbimg.dyalog`) into a `clear WS` and save it as a workspace `stbimg.dws` on the workspace search path. (Required to run examples)
 
