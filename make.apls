@@ -7,6 +7,4 @@
 (1010⌶)1  
 ⎕SH'gcc stbimg.c -Wall -Wextra -pedantic -O3 -march=native -fPIC -shared -o stbimg.so'
 ⎕SH'cp ./stbimg.so $DYALOG/lib/'
-⎕←'' 
-
-
+⎕←''
