@@ -17,6 +17,8 @@ Save, load and resize image in Dyalog APL. Based on [stb_image](https://github.c
     ```
     gcc stbimg.c -Wall -Wextra -pedantic -O3 -march=native -fPIC -shared -o stbimg.so
     ```
+    Put the shared library somewhere ⎕NA knows.
+    
     Or use an APL script to compile and install the shared library under $DYALOG/lib:
     ```
     sudo dyalogscript install.apls
