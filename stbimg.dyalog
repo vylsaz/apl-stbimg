@@ -6,7 +6,11 @@
   :Field Public Shared ReadOnly rgb_alpha←4
   :Field Public Shared ReadOnly rgba←4
   
-  :Field Private Shared ReadOnly shared_lib←'stbimg'
+  GetExt←{
+    mac win←∨/¨'Mac' 'Windows'⍷¨⊂⊃'.'⎕WG'APLVersion'
+    ⍵,'' '.so' '.dylib'⊃⍨⎕IO+mac+~win
+  }
+  :Field Private Shared ReadOnly shared_lib←GetExt 'stbimg'
   :Field Private Shared ReadOnly gamma←2.2   
   :Field Private Shared call_ns←⎕NS''
      
