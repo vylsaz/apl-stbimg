@@ -60,7 +60,7 @@
     b←2 2⍴0 2 3 1
     ⍵≡0:b
     ,[0 1],[2 3]0 2 1 3⍉b∘.+4×∇⍵-1 ⍝ a generalized Kronecker product
-    ⍝ - outer product but with rank of the left argument
+    ⍝ - outer product but the rank remains 2.
   }
 
   _orderedDither←{
