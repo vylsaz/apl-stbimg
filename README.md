@@ -105,7 +105,7 @@ R is the information. See `stbimg.Info`.
 {R}←{X} stbimg.DispHTML Y
 ```
 Y is a rank 2 array of grayscale or rank 3 array. See `stbimg.Save`. The alpha channel is ignored.  
-X is a string to be used as the left argument of `⎕WC`. X defaults to `∆f` for `stbimg.Disp` and `∆hr` for `stbimg.DispHTML`.  
+X is a string to be used as the left argument of `⎕WC`. X defaults to `'∆f'` for `stbimg.Disp` and `'∆hr'` for `stbimg.DispHTML`.  
 R is a refrence to the GUI object.  
 `stbimg.DispHTML` uses HTMLRenderer (cross-platform).
 
@@ -114,7 +114,7 @@ R is a refrence to the GUI object.
 {R}←{X} stbimg.ShowHTML Y
 ```
 Y is the path of a file whose format is jpg, bmp or png.  
-X is a string to be used as the left argument of `⎕WC`. X defaults to `∆f` for `stbimg.Show` and `∆hr` for `stbimg.ShowHTML`.  
+X is a string to be used as the left argument of `⎕WC`. X defaults to `'∆f'` for `stbimg.Show` and `'∆hr'` for `stbimg.ShowHTML`.  
 R is a refrence to the GUI object.  
 `stbimg.ShowHTML` uses HTMLRenderer (cross-platform).
 
