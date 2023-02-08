@@ -149,7 +149,7 @@ R is the corresponding  0-1 floating point number values.
 ```apl
 R←stbimg.ChanFromGrid Y
 ```
-Y is a rank 2 or 3 array.
+Y is a rank 2 or 3 array.  
 R is a vector of matrices. Each matrix is the image data of one of the channels.  
 
 ```apl
