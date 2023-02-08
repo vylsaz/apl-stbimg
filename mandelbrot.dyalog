@@ -25,7 +25,7 @@
     _←#.isolate.Reset 0
     p←#.isolate.Config 'processors' 
     w h←⍵ 
-    (l b)(r t)←9 11∘○¨⍺⍺ ⍵⍵
+    ((l b)(r t))←9 11∘○¨⍺⍺ ⍵⍵
     dl db←w h÷⍨r t-l b 
     rows←p{¯2-/⌈⍵,⍨(⍳⍺)×⍵÷⍺}h
     buts←b+db×1↓⌽0,+\rows
@@ -42,16 +42,16 @@
   Calc←{⍺←32
     ⍝ ⍺←iterations
     ⍝ ⍵←width,height
-    ⍝ r←matrix of ratio ⋄ (⍴r)≡height,width
+    ⍝ r←image data ⋄ (⍴r)≡height,width,3
     clr←⍺(¯2j¯1 _Calc_ 1j1)⍵
-    pal←Palette ⍺
-    pal[;clr]
+    pal←⍉Palette ⍺
+    pal[clr;]
   }
   Show←{   
-    stbimg.(ShowHTML ⍺ Save GridFromChan)⍵
+    stbimg.(ShowHTML ⍺ Save ⍵)
   }
   ∇ Demo
-    stbimg.(DispHTML GridFromChan) Calc 1200 800
+    stbimg.DispHTML Calc 1200 800
   ∇
 :EndNamespace
 
