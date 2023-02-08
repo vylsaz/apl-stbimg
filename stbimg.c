@@ -43,7 +43,7 @@ typedef int32_t  I4;
 typedef float    F4;
 
 // notice that it uses I4 (not a big problem)
-STBIMG_API I4 STBIMG_Info(char const *filename, I4 *width, I4 *height, I4 *channels) {
+STBIMG_API I4 STBIMG_Info(char const *filename, I4 *height, I4 *width, I4 *channels) {
     *width = 0; *height = 0; *channels = 0;
     return stbi_info(filename, width, height, channels);
 }
@@ -69,7 +69,7 @@ STBIMG_API void STBIMG_Load_U2(char const *filename, I4 channels, U2 *rawdata) {
     stbi_image_free(data);
 }
 
-STBIMG_API I4 STBIMG_Info_Mem(U1 const *mem, I4 len, I4 *width, I4 *height, I4 *channels) {
+STBIMG_API I4 STBIMG_Info_Mem(U1 const *mem, I4 len, I4 *height, I4 *width, I4 *channels) {
     *width = 0; *height = 0; *channels = 0;
     return stbi_info_from_memory(mem, len, width, height, channels);
 }
@@ -81,23 +81,23 @@ STBIMG_API void STBIMG_Load_U1_Mem(U1 const *mem, I4 len, I4 channels, U1 *rawda
     stbi_image_free(data);
 }
 
-STBIMG_API I4 STBIMG_Save_PNG(char const *filename, I4 width, I4 height, I4 channels, U1 *rawdata) {
+STBIMG_API I4 STBIMG_Save_PNG(char const *filename, I4 height, I4 width, I4 channels, U1 *rawdata) {
     return stbi_write_png(filename, width, height, channels, rawdata, channels*width*sizeof(U1));
 }
 
-STBIMG_API I4 STBIMG_Save_BMP(char const *filename, I4 width, I4 height, I4 channels, U1 *rawdata) {
+STBIMG_API I4 STBIMG_Save_BMP(char const *filename, I4 height, I4 width, I4 channels, U1 *rawdata) {
     return stbi_write_bmp(filename, width, height, channels, rawdata);
 }
 
-STBIMG_API I4 STBIMG_Save_JPG(char const *filename, I4 width, I4 height, I4 channels, U1 *rawdata) {
+STBIMG_API I4 STBIMG_Save_JPG(char const *filename, I4 height, I4 width, I4 channels, U1 *rawdata) {
     return stbi_write_jpg(filename, width, height, channels, rawdata, 100);
 }
 
-STBIMG_API I4 STBIMG_Save_TGA(char const *filename, I4 width, I4 height, I4 channels, U1 *rawdata) {
+STBIMG_API I4 STBIMG_Save_TGA(char const *filename, I4 height, I4 width, I4 channels, U1 *rawdata) {
     return stbi_write_tga(filename, width, height, channels, rawdata);
 }
 
-STBIMG_API U1 *STBIMG_Save_PNG_Mem(I4 width, I4 height, I4 channels, U1 *rawdata, I4 *out_len) {
+STBIMG_API U1 *STBIMG_Save_PNG_Mem(I4 height, I4 width, I4 channels, U1 *rawdata, I4 *out_len) {
     return stbi_write_png_to_mem(rawdata, channels*width*sizeof(U1), width, height, channels, out_len);
 }
 
@@ -141,8 +141,8 @@ STBIMG_API I4 STBIMG_Encode_64(U1 *mem, I4 len, U1 *out, I4 nchars) {
 }
 
 STBIMG_API I4 STBIMG_Resize_U1(
-    U1 *input,  I4 in_width,  I4 in_height, 
-    U1 *output, I4 out_width, I4 out_height, I4 channels
+    U1 *input,  I4 in_height,  I4 in_width, 
+    U1 *output, I4 out_height, I4 out_width, I4 channels
 ) {
     return stbir_resize_uint8(
         input,  in_width,  in_height,  0, 

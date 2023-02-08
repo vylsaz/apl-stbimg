@@ -45,14 +45,13 @@
     ⍝ r←matrix of ratio ⋄ (⍴r)≡height,width
     clr←⍺(¯2j¯1 _Calc_ 1j1)⍵
     pal←Palette ⍺
-    (⊂⍤¯1)pal[;clr]
+    pal[;clr]
   }
   Show←{   
-    stbimg.(ShowHTML ⍺ Save ⍵)
+    stbimg.(ShowHTML ⍺ Save GridFromChan)⍵
   }
   ∇ Demo
-    stbimg.DispHTML Calc 1200 800
+    stbimg.(DispHTML GridFromChan) Calc 1200 800
   ∇
 :EndNamespace
-
 

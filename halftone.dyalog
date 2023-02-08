@@ -70,7 +70,7 @@
     1<⍵+p[ph|⍳ih;pw|⍳iw] ⍝ wrapped indexing, then apply threshold
   }
 
-  ∇ Demo;P;g;i;n;y;r;h
+  ∇ Demo;P;g;i;n;y;r;h;H
     ⍝ please load it manually, I don't know how to make it work.
     :If 0=⎕NC'#.HttpCommand'
       ('Please',(⎕UCS 13),'      ]load HttpCommand')⎕SIGNAL 6
@@ -79,39 +79,41 @@
     h←'<title>demo</title>'
     ⎕←g←#.HttpCommand.Get'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'
     
-    i←stbimg.(rgb LoadMem⊢)g.Data
+    i←stbimg.(RGB LoadMem ⊢)g.Data
     h,←P ⎕←'original'
     h,←stbimg.EmitHTML i
     
-    n←stbimg.ToNorm i
+    n←stbimg.(ChanFromGrid∘NormFromByte) i
     y←ToLuminance n
+
+    H←stbimg.(EmitHTML∘ByteFromNorm)
 
     ⍝ faster, but looks not that good
     r←0.1 RandomDither y
     h,←P ⎕←'random dither'
-    h,←stbimg.(EmitHTML∘FromNorm)r
+    h,←H r
     
     ⍝ uses Bayer matrix
     r←2 (Bayer _orderedDither) y
     h,←P ⎕←'ordered dither'
-    h,←stbimg.(EmitHTML∘FromNorm)r
+    h,←H r
      
     ⍝ it's too slow for larger images...    
     r←Atkinson y
     h,←P ⎕←'error diffusion (grayscale)'
-    h,←stbimg.(EmitHTML∘FromNorm)r
+    h,←H r
      
     ⍝ we can generalize this to all three channels
     r←Floyd_Steinberg¨n
     h,←P ⎕←'error diffusion (rgb)'
-    h,←stbimg.(EmitHTML∘FromNorm)r
+    h,←H stbimg.GridFromChan r
      
     ⍝ what if we filter out the noisy parts?
     ⍝ i.e. take the average in a window
     ⍝ this is how halftoning works, because
     ⍝ human eyes act like a low pass filter
     h,←P ⎕←'low pass filter'
-    h,←stbimg.(EmitHTML∘FromNorm)LowPass¨r
+    h,←H stbimg.GridFromChan LowPass¨r
    
     'hr'⎕WC'HTMLRenderer'h
   ∇
