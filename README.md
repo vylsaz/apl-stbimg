@@ -73,7 +73,7 @@ Y is a rank 2 array of grayscale or rank 3 array.
 X is the path. Currently, the supported extensions are .png, .bmp, .jpg (or .jpeg) and .tga.
 
 ```apl
-R←{X} stbimg.EmitHTML Y
+R←stbimg.EmitHTML Y
 ```
 Y is a rank 2 array of grayscale or rank 3 array. See `stbimg.Save`.  
 R is a character vector containing an HTML \<img\> tag with a base64-encoded png embedded.
