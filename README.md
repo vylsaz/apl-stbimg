@@ -31,12 +31,13 @@ The namespace/class stbimg is in `stbimg.dyalog`.
 
 The documentation assumes ```⎕IO ⎕ML←0 1```. `stbimg` is ⎕IO and ⎕ML insensitive (the class has its ⎕IO and ⎕ML). 
 
-The "Norm" variants of functions expect color to be 0-1 floating point numbers. The "Lin" variants are their linear version.  
+The "Norm" variants of functions expect color to be 0-1 floating point numbers.
 Otherwise, color is in 0-255 integer value.
+
+### Load Image
 
 ```apl
 R←{X} stbimg.Load Y
-R←{X} stbimg.LoadLin Y
 R←{X} stbimg.LoadNorm Y
 ```
 Y is the path of a file whose format is [supported by stb_image](https://github.com/nothings/stb/blob/master/stb_image.h#L19).  
@@ -49,101 +50,113 @@ X, if present, is one of 1, 2, 3 or 4. It represents the number of color channel
 | 4 | rgb and alpha |
 
 If X is not present, the number of channels is decided by the image.  
-R is a vector of matrices representing colors. Length of R equals to the number of channels. Thus if X is present, `X≡≢R`.  
-The shape of matrices in R equals to `height,width` of the image.
+R is a rank 3 array whose shape equals to `(height, width, channels)` of the image.
 
 ```apl
 R←{X} stbimg.LoadMem Y
 ```
-Y is a memory (byte array) containing an image.  
+Y is a buffer (byte array) containing an image.  
 Otherwise it is the same as `stbimg.Load`. 
+
+### Save Image
 
 ```apl
 X←X stbimg.Save Y
 ```
-Y is either a simple matrix for greyscale, or a vector of matrices. `≢⊆Y` is the number of channels of the resulting image.  
+Y is a rank 2 array of grayscale or rank 3 array.  
+| `⍴Y`  | description |
+| ----- | --- |
+| \[0\] | the height of the image. |
+| \[1\] | the wifth of the image. |
+| \[2\] | the number of channels (1, 2, 3 or 4) if it exists. |
+
 X is the path. Currently, the supported extensions are .png, .bmp, .jpg (or .jpeg) and .tga.
 
 ```apl
 R←{X} stbimg.EmitHTML Y
 ```
-Y is either a simple matrix for greyscale, or a vector of matrices. `≢⊆Y` is the number of channels of the resulting image.  
-If X exists and is true (has value 1), the image has a min and max size.  
+Y is a rank 2 array of grayscale or rank 3 array. See `stbimg.Save`.  
 R is a character vector containing an HTML \<img\> tag with a base64-encoded png embedded.
+
+### Get Image Info
 
 ```apl
 R←stbimg.Info Y
 ```
 Y is the path of a file whose format is supported by stb_image.  
-R is a length 4 vector.  
+R is a vector of 4 elements.  
 | R\[\] | description |
-| --- | --- |
-| R\[0\] | 1 if the file is read successfully. If R\[0\] is 0, the rest of R is invalid. |
-| R\[1\] | the width of the image. |
-| R\[2\] | the height of the image. |
-| R\[3\] | the number of channels (one of 1, 2, 3 or 4). Refer to the previous section of `stbimg.Load`. |
+| ----- | --- |
+| \[0\] | 1 if the file is read successfully. If R\[0\] is 0, the rest of R is invalid. |
+| \[1\] | the height of the image. |
+| \[2\] | the wifth of the image. |
+| \[3\] | the number of channels (1, 2, 3 or 4). Refer to the previous section of `stbimg.Load`. |
 
 ```apl
 R←stbimg.InfoMem Y
 ```
-Y is a memory (byte array) containing an image.  
+Y is a buffer (byte array) containing an image.  
 R is the information. See `stbimg.Info`.
 
-```apl
-stbimg.Disp Y
-stbimg.DispHTML Y
-```
-Y is either a simple matrix for greyscale, or a vector of matrices. `≢⊆Y` is the number of channels of the resulting image. The alpha channel is ignored.  
-The image is displayed on a window implemented in Dyalog GUI object "Form" or (for DispHTML) "HTMLRenderer" (cross-platform).
+### Display Image
 
 ```apl
-stbimg.Show Y
-stbimg.ShowHTML Y
+{R}←stbimg.Disp Y
+{R}←stbimg.DispHTML Y
+```
+Y is a rank 2 array of grayscale or rank 3 array. See `stbimg.Save`. The alpha channel is ignored.  
+R is a refrence to the GUI object.  
+`stbimg.DispHTML` uses HTMLRenderer (cross-platform).
+
+```apl
+{R}←stbimg.Show Y
+{R}←stbimg.ShowHTML Y
 ```
 Y is the path of a file whose format is jpg, bmp or png.  
-The image is displayed on a window implemented in Dyalog GUI object "Form" or (for ShowHTML) "HTMLRenderer" (cross-platform).
+R is a refrence to the GUI object.  
+`stbimg.ShowHTML` uses HTMLRenderer (cross-platform).
+
+### Resize Image
 
 ```apl
 R←X stbimg.Resize Y
 ```
-Y is either a simple matrix for greyscale, or a vector of matrices.  
+Y is a rank 2 array of grayscale or rank 3 array. See `stbimg.Save`.  
 X is the new (height,width) of the image. If this order seems counter-intuitive, think of `⍴` or reshape.  
-R is the resized image. R is either a simple matrix for greyscale, or a vector of matrices, and the depth is the same as Y.
+R is the resized image with the new height and width, but the same channels as Y.
 
 ```apl
 R←X stbimg.Scale Y
 ```
-Y is either a simple matrix for greyscale, or a vector of matrices.  
+Y is a rank 2 array of grayscale or rank 3 array. See `stbimg.Save`.  
 X is the scale. The new (height,width) is the integer part of X times (height,width) of the image.  
-R is the resized image. R is either a simple matrix for greyscale, or a vector of matrices, and the depth is the same as Y.
+R is the resized image with the new height and width, but the same channels as Y.
+
+### Convert Image
 
 ```apl
-R←stbimg.FromLin Y
-R←stbimg.FromNorm Y
+R←stbimg.ByteFromNorm Y
 ```
-Y is either a simple matrix for greyscale, or a vector of matrices.  
+Y is a rank 2 or 3 array of 0-1 floating point numbers.  
 R is the corresponding 0-255 integer values.
 
 ```apl
-R←stbimg.ToLin Y
-R←stbimg.ToNorm Y
+R←stbimg.NormFromByte Y
 ```
-Y is either a simple matrix for greyscale, or a vector of matrices of 0-255 integers.  
-R is the corresponding values.
+Y is a rank 2 or 3 array of 0-255 integers.  
+R is the corresponding  0-1 floating point number values.
 
 ```apl
-R←stbimg.LinFromNorm Y
-R←stbimg.NormFromLin Y
+R←stbimg.ChanFromGrid Y
 ```
-Y is either a simple matrix for greyscale, or a vector of matrices.  
-R is the corresponding values.
+Y is a rank 2 or 3 array.
+R is a vector of matrices. Each matrix is the image data of one of the channels.  
 
 ```apl
-R←X stbimg.GammaCorr Y
+R←stbimg.GridFromChan Y
 ```
-Y is either a simple matrix for greyscale, or a vector of matrices.  
-X is a gamma value.  
-R is the result of `Y*X` (Y raised to the power of X), but the alpha channel is not changed.
+Y is a vector of matrices.  
+R is a rank 3 array.
 
 ## Example
 See `mandelbrot.dyalog` and `halftone.dyalog`.
