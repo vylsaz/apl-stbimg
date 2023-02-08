@@ -44,8 +44,8 @@ Y is the path of a file whose format is [supported by stb_image](https://github.
 X, if present, is one of 1, 2, 3 or 4. It represents the number of color channels.  
 | number of channels | description         | constant                          |
 | ------------------ | ------------------- | --------------------------------- |
-| 1                  | greyscale           | `stbimg.Y`, `stbimg.GRAY`         |
-| 2                  | greyscale and alpha | `stbimg.YA`, `stbimg.GRAY_ALPHA`  |
+| 1                  | grayscale           | `stbimg.Y`, `stbimg.GRAY`         |
+| 2                  | grayscale and alpha | `stbimg.YA`, `stbimg.GRAY_ALPHA`  |
 | 3                  | rgb                 | `stbimg.RGB`                      |
 | 4                  | rgb and alpha       | `stbimg.RGBA`, `stbimg.RGB_ALPHA` |
 
