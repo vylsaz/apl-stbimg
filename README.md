@@ -67,7 +67,7 @@ Y is a rank 2 array of grayscale or rank 3 array.
 | `⍴Y`  | description |
 | ----- | --- |
 | \[0\] | the height of the image. |
-| \[1\] | the wifth of the image. |
+| \[1\] | the width of the image. |
 | \[2\] | the number of channels (1, 2, 3 or 4) if it exists. |
 
 X is the path. Currently, the supported extensions are .png, .bmp, .jpg (or .jpeg) and .tga.
@@ -89,7 +89,7 @@ R is a vector of 4 elements.
 | ----- | --- |
 | \[0\] | 1 if the file is read successfully. If R\[0\] is 0, the rest of R is invalid. |
 | \[1\] | the height of the image. |
-| \[2\] | the wifth of the image. |
+| \[2\] | the width of the image. |
 | \[3\] | the number of channels (1, 2, 3 or 4). Refer to the previous section of `stbimg.Load`. |
 
 ```apl
