@@ -42,12 +42,12 @@ R←{X} stbimg.LoadNorm Y
 ```
 Y is the path of a file whose format is [supported by stb_image](https://github.com/nothings/stb/blob/master/stb_image.h#L19).  
 X, if present, is one of 1, 2, 3 or 4. It represents the number of color channels.  
-| number of channels | description |
-| --- | --- |
-| 1 | greyscale |
-| 2 | greyscale and alpha |
-| 3 | rgb |
-| 4 | rgb and alpha |
+| number of channels | description         | constant                          |
+| ------------------ | ------------------- | --------------------------------- |
+| 1                  | greyscale           | `stbimg.Y`, `stbimg.GRAY`         |
+| 2                  | greyscale and alpha | `stbimg.YA`, `stbimg.GRAY_ALPHA`  |
+| 3                  | rgb                 | `stbimg.RGB`                      |
+| 4                  | rgb and alpha       | `stbimg.RGBA`, `stbimg.RGB_ALPHA` |
 
 If X is not present, the number of channels is decided by the image.  
 R is a rank 3 array whose shape equals to `(height, width, channels)` of the image.
@@ -64,10 +64,10 @@ Otherwise it is the same as `stbimg.Load`.
 X←X stbimg.Save Y
 ```
 Y is a rank 2 array of grayscale or rank 3 array.  
-| `⍴Y`  | description |
-| ----- | --- |
-| \[0\] | the height of the image. |
-| \[1\] | the width of the image. |
+| `⍴Y`  | description                                         |
+| ----- | --------------------------------------------------- |
+| \[0\] | the height of the image.                            |
+| \[1\] | the width of the image.                             |
 | \[2\] | the number of channels (1, 2, 3 or 4) if it exists. |
 
 X is the path. Currently, the supported extensions are .png, .bmp, .jpg (or .jpeg) and .tga.
@@ -85,11 +85,11 @@ R←stbimg.Info Y
 ```
 Y is the path of a file whose format is supported by stb_image.  
 R is a vector of 4 elements.  
-| R\[\] | description |
-| ----- | --- |
-| \[0\] | 1 if the file is read successfully. If R\[0\] is 0, the rest of R is invalid. |
-| \[1\] | the height of the image. |
-| \[2\] | the width of the image. |
+| R\[\] | description                                                                            |
+| ----- | -------------------------------------------------------------------------------------- |
+| \[0\] | 1 if the file is read successfully. If R\[0\] is 0, the rest of R is invalid.          |
+| \[1\] | the height of the image.                                                               |
+| \[2\] | the width of the image.                                                                |
 | \[3\] | the number of channels (1, 2, 3 or 4). Refer to the previous section of `stbimg.Load`. |
 
 ```apl
