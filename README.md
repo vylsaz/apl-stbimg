@@ -24,10 +24,10 @@ Save, load and resize image in Dyalog APL. Based on [stb_image](https://github.c
     sudo dyalogscript install.apls
     ```
 
-- (Optional) Load the class script (`stbimg.dyalog`) into a `clear WS` and save it as a workspace `stbimg.dws` on the workspace search path. (Required to run examples)
+- (Optional) Load the class script (`stbimg.aplc`) into a `clear WS` and save it as a workspace `stbimg.dws` on the workspace search path.
 
 ## Usage
-The namespace/class stbimg is in `stbimg.dyalog`.
+The namespace/class stbimg is in `stbimg.aplc`.
 
 The documentation assumes ```⎕IO ⎕ML←0 1```. `stbimg` is ⎕IO and ⎕ML insensitive (the class has its ⎕IO and ⎕ML). 
 
@@ -102,21 +102,21 @@ R is the information. See `stbimg.Info`.
 
 ```apl
 {R}←{X} stbimg.Disp Y
-{R}←{X} stbimg.DispHTML Y
+{R}←{X} stbimg.DispForm Y
 ```
 Y is a rank 2 array of grayscale or rank 3 array. See `stbimg.Save`. The alpha channel is ignored.  
-X is a string to be used as the left argument of `⎕WC`. X defaults to `'∆f'` for `stbimg.Disp` and `'∆hr'` for `stbimg.DispHTML`.  
+X is a string to be used as the left argument of `⎕WC`. X defaults to `'∆f'` for `stbimg.DispForm` and `'∆hr'` for `stbimg.Disp`.  
 R is a refrence to the GUI object.  
-`stbimg.DispHTML` uses HTMLRenderer (cross-platform).
+`stbimg.Disp` uses HTMLRenderer (cross-platform).
 
 ```apl
 {R}←{X} stbimg.Show Y
-{R}←{X} stbimg.ShowHTML Y
+{R}←{X} stbimg.ShowForm Y
 ```
 Y is the path of a file whose format is jpg, bmp or png.  
-X is a string to be used as the left argument of `⎕WC`. X defaults to `'∆f'` for `stbimg.Show` and `'∆hr'` for `stbimg.ShowHTML`.  
+X is a string to be used as the left argument of `⎕WC`. X defaults to `'∆f'` for `stbimg.ShowForm` and `'∆hr'` for `stbimg.Show`.  
 R is a refrence to the GUI object.  
-`stbimg.ShowHTML` uses HTMLRenderer (cross-platform).
+`stbimg.Show` uses HTMLRenderer (cross-platform).
 
 ### Resize Image
 
@@ -161,17 +161,16 @@ Y is a vector of matrices.
 R is a rank 3 array.
 
 ## Example
-See `mandelbrot.dyalog` and `halftone.dyalog`.
+See `mandelbrot.apln` and `halftone.apln`.
 
 For mandelbrot:
 ```apl
-      mandelbrot.Demo
+      mandelbrot.Run
 ```
 
 For halftone:
 ```apl
-      ]load HttpCommand
-      halftone.Demo
+      halftone.Run
 ```
 
 On Windows, a dialog about network access might show up -- that can be (a) mandelbrot uses `isolate`; (b) halftone.Demo downloads an image from the internet.
@@ -179,6 +178,6 @@ On Windows, a dialog about network access might show up -- that can be (a) mande
 ![screenshot of a jupyter notebook](image/notebook.png)
 
 ## License
-`stbimg.c`, `stbimg.dyalog`, `halftone.dyalog` and `mandelbrot.dyalog` are under MIT license.
+`stbimg.c`, `stbimg.aplc`, `halftone.apln` and `mandelbrot.apln` are under MIT license.
 
 `stb_image.h`, `stb_image_resize.h` and `stb_image_write.h` are in the public domain. Big thanks to all contributors of the stb library.
