@@ -1,3 +1,2 @@
-*.aplc linguist-language=APL
-*.apln linguist-language=APL
-*.apls linguist-language=APL
+*.apl? linguist-language=APL
+stb_*  linguist-vendored
