@@ -1,2 +1,2 @@
-*.apl? linguist-language=APL
-stb_*  linguist-vendored
+*.apl?  linguist-language=APL
+./stb_* linguist-vendored
