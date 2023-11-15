@@ -124,7 +124,7 @@ Y can be
 X is a string to be used as the left argument of `⎕WC`. X defaults to `'∆h'`.  
 R is a refrence to the GUI object.  
 `stbimg.Show` uses HTMLRenderer (cross-platform).  
-`stbimg.ShowForm` uses `X ⎕WS 'Form'`
+`stbimg.ShowForm` uses `X ⎕WC 'Form'`
 
 ### Helpers
 
