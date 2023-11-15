@@ -29,16 +29,13 @@ Save, load and resize image in Dyalog APL. Based on [stb_image](https://github.c
 ## Usage
 The namespace/class stbimg is in `stbimg.aplc`.
 
-The documentation assumes ```⎕IO ⎕ML←0 1```. `stbimg` is ⎕IO and ⎕ML insensitive (the class has its ⎕IO and ⎕ML). 
+The documentation assumes ```⎕IO ⎕ML←0 1```. `stbimg` itself is ⎕IO and ⎕ML insensitive. 
 
-The "Norm" variants of functions expect color to be 0-1 floating point numbers.
-Otherwise, color is in 0-255 integer value.
 
 ### Load Image
 
 ```apl
-R←{X} stbimg.Load Y
-R←{X} stbimg.LoadNorm Y
+{R}←{X} stbimg.Load Y
 ```
 Y is the path of a file whose format is [supported by stb_image](https://github.com/nothings/stb/blob/master/stb_image.h#L19).  
 X, if present, is one of 1, 2, 3 or 4. It represents the number of color channels.  
@@ -50,7 +47,7 @@ X, if present, is one of 1, 2, 3 or 4. It represents the number of color channel
 | 4                  | rgb and alpha       | `stbimg.RGBA`, `stbimg.RGB_ALPHA` |
 
 If X is not present, the number of channels is decided by the image.  
-R is a rank 3 array whose shape equals to `(height, width, channels)` of the image.
+R is a rank 3 integer (0-255) array, whose shape equals to `(height, width, channels)` of the image.
 
 ```apl
 R←{X} stbimg.LoadMem Y
@@ -98,26 +95,6 @@ R←stbimg.InfoMem Y
 Y is a buffer (byte array) containing an image.  
 R is the information. See `stbimg.Info`.
 
-### Display Image
-
-```apl
-{R}←{X} stbimg.Disp Y
-{R}←{X} stbimg.DispForm Y
-```
-Y is a rank 2 array of grayscale or rank 3 array. See `stbimg.Save`. The alpha channel is ignored.  
-X is a string to be used as the left argument of `⎕WC`. X defaults to `'∆f'` for `stbimg.DispForm` and `'∆hr'` for `stbimg.Disp`.  
-R is a refrence to the GUI object.  
-`stbimg.Disp` uses HTMLRenderer (cross-platform).
-
-```apl
-{R}←{X} stbimg.Show Y
-{R}←{X} stbimg.ShowForm Y
-```
-Y is the path of a file whose format is jpg, bmp or png.  
-X is a string to be used as the left argument of `⎕WC`. X defaults to `'∆f'` for `stbimg.ShowForm` and `'∆hr'` for `stbimg.Show`.  
-R is a refrence to the GUI object.  
-`stbimg.Show` uses HTMLRenderer (cross-platform).
-
 ### Resize Image
 
 ```apl
@@ -134,31 +111,46 @@ Y is a rank 2 array of grayscale or rank 3 array. See `stbimg.Save`.
 X is the scale. The new (height,width) is the integer part of X times (height,width) of the image.  
 R is the resized image with the new height and width, but the same channels as Y.
 
-### Convert Image
+### Display Image
 
 ```apl
-R←stbimg.ByteFromNorm Y
+{R}←{X} stbimg.Show Y
+{R}←{X} stbimg.ShowForm Y
 ```
-Y is a rank 2 or 3 array of 0-1 floating point numbers.  
-R is the corresponding 0-255 integer values.
+Y can be
+- a rank 2 array of grayscale or rank 3 array. See `stbimg.Save`.
+- the path of a file whose format is jpg, bmp or png. 
+
+X is a string to be used as the left argument of `⎕WC`. X defaults to `'∆h'`.  
+R is a refrence to the GUI object.  
+`stbimg.Show` uses HTMLRenderer (cross-platform).  
+`stbimg.ShowForm` uses `X ⎕WS 'Form'`
+
+### Helpers
 
 ```apl
-R←stbimg.NormFromByte Y
+R←stbimg.Normalize Y
 ```
-Y is a rank 2 or 3 array of 0-255 integers.  
+Y is an array of 0-255 integers.  
 R is the corresponding  0-1 floating point number values.
 
 ```apl
-R←stbimg.ChanFromGrid Y
+R←stbimg.Denormalize Y
 ```
-Y is a rank 2 or 3 array.  
-R is a vector of matrices. Each matrix is the image data of one of the channels.  
+Y is an array of 0-1 floating point numbers.  
+R is the corresponding 0-255 integer values.
 
 ```apl
-R←stbimg.GridFromChan Y
+R←stbimg.Interleave Y
 ```
-Y is a vector of matrices.  
-R is a rank 3 array.
+Y is an array of shape `(height, width, channels)`.  
+R is an array of shape `(channels, height, width)`.
+
+```apl
+R←stbimg.Deinterleave Y
+```
+Y is an array of shape `(channels, height, width)`.  
+R is an array of shape `(height, width, channels)`.  
 
 ## Example
 See `mandelbrot.apln` and `halftone.apln`.

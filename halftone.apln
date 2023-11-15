@@ -10,8 +10,7 @@
   ToLuminance←{
     ⍝ ⍵ ←→ normalized r g b
     ⍝ r ←→ normalized luminance/grayscale
-    ⍝ height width ≡ ⍴r
-    ⊃0.299 0.587 0.114+.×⍵
+    0.299 0.587 0.114+.×⍵
   }
 
   ∇ r←(weight _ErrorDiffusion_ coords) img;len;shp;o;i;p;e;n;m
@@ -72,52 +71,51 @@
     1<⍵+p[ph|⍳ih;pw|⍳iw] ⍝ wrapped indexing, then apply threshold
   }
 
-  ∇ Run;P;u;g;i;n;y;r;h;H
-    ⍝ please load it manually, I don't know how to make it work.
+  ∇ Run;F;u;g;i;n;y;r;h;H
     :If 0=⎕NC'#.HttpCommand'
       ('Please',(⎕UCS 13),'      ]load HttpCommand')⎕SIGNAL 6
     :EndIf
-    P←{'<p>',⍵,'</p>'}
-    h←'<title>demo</title>'
+    F←{'<figure>',⍺,'<figcaption>',⍵,'</figcaption></figure>'}
     u←'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'
     ⎕←g←#.HttpCommand.Get u
 
+    h←'<!DOCTYPE html><html><head><title>demo</title>'
+    h,←'<style>div{display:flex;flex-wrap:wrap;}</style>'
+
+    h,←'</head><body><div>'
+
     i←stbimg.(RGB LoadMem ⊢)g.Data
-    h,←P ⎕←'original'
-    h,←stbimg.EmitHTML i
+    h,←(stbimg.EmitHTML i) F ⎕←'original'
 
-    n←stbimg.(ChanFromGrid∘NormFromByte) i
-    y←ToLuminance n
+    n←stbimg.Normalize i
+    y←(ToLuminance⍤1)n
 
-    H←stbimg.(EmitHTML∘ByteFromNorm)
+    H←stbimg.(EmitHTML∘Denormalize)
 
     ⍝ faster, but looks not that good
     r←0.1 RandomDither y
-    h,←P ⎕←'random dither'
-    h,←H r
+    h,←(H r) F ⎕←'random dither'
 
     ⍝ uses Bayer matrix
     r←2 (Bayer _orderedDither) y
-    h,←P ⎕←'ordered dither'
-    h,←H r
+    h,←(H r) F ⎕←'ordered dither'
 
     ⍝ it's too slow for larger images...
     r←Atkinson y
-    h,←P ⎕←'error diffusion (grayscale)'
-    h,←H r
+    h,←(H r) F ⎕←'error diffusion (grayscale)'
 
     ⍝ we can generalize this to all three channels
-    r←Floyd_Steinberg¨n
-    h,←P ⎕←'error diffusion (rgb)'
-    h,←H stbimg.GridFromChan r
+    r←(Floyd_Steinberg⍤2) stbimg.Deinterleave n
+    h,←(H stbimg.Interleave r) F ⎕←'error diffusion (rgb)'
 
     ⍝ what if we filter out the noisy parts?
     ⍝ i.e. take the average in a window
     ⍝ this is how halftoning works, because
     ⍝ human eyes act like a low pass filter
-    h,←P ⎕←'low pass filter'
-    h,←H stbimg.GridFromChan LowPass¨r
+    h,←(H stbimg.Interleave (LowPass⍤2)r) F ⎕←'low pass filter'
 
+    h,←'</div></body></html>'
+    
     'hr'⎕WC'HTMLRenderer'h
   ∇
 :EndNamespace

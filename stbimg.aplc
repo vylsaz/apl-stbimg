@@ -1,20 +1,18 @@
 :Class stbimg
-  ⎕IO ⎕ML←0 1
-  :Field Public Shared ReadOnly Y←1
-  :Field Public Shared ReadOnly YA←2
-  :Field Public Shared ReadOnly RGB←3
-  :Field Public Shared ReadOnly RGBA←4
-  :Field Public Shared ReadOnly GRAY←1
-  :Field Public Shared ReadOnly GRAY_ALPHA←2
-  :Field Public Shared ReadOnly RGB_ALPHA←4 
+  (⎕IO ⎕ML)←0 1
 
-  GetExt←{
+  GetExt←{⍺←''
     mac win←∨/¨'Mac' 'Windows'⍷¨⊂⊃'.'⎕WG'APLVersion'
-    ⍵,'' '.so' '.dylib'⊃⍨mac+~win
+    ⍵,(⍺ '.so' '.dylib')⊃⍨mac+~win
   }
-  :Field Private Shared ReadOnly LIB←GetExt 'stbimg'
+  GetExtWarn←{
+    f←'.dll'GetExt ⍵
+    ~⎕NEXISTS f:22⎕SIGNAL⍨⎕←f,' not found' 
+    GetExt ⍵
+  }
+  :Field Private Shared ReadOnly LIB←GetExtWarn 'stbimg'
   :Field Private Shared call_ns←⎕NS''
-     
+
   ∇ rslt←(func _Call_ type) args;r;p;call
     :Access Private Shared      
     :If 3≠call_ns.⎕NC func 
@@ -22,42 +20,29 @@
       call←r,' ',LIB,'|',func,' ',p
       call_ns.⎕NA call
     :EndIf 
-    rslt←(call_ns.⍎func)args      
+    rslt←(call_ns⍎func)args      
   ∇ 
-  
+
   ∇ info←Info name
     :Access Public Shared
     :If 0≡0 2∊⍨10|⎕DR name ⋄ 'Not a file name'⎕SIGNAL 11 ⋄ :EndIf
     info←('STBIMG_Info'_Call_'I4' '<0UTF8[] >I4 >I4 >I4')name 0 0 0
   ∇
 
-  ∇ data←info (data_type _Load) name;ok;h;w;ch;len;type;func
-    :Access Private Shared
-    (ok h w ch)←info
+  ∇ data←{ch} Load name;ok;h;w;n;len;type
+    :Access Public Shared
+    (ok h w n)←Info name
+    :If 0=⎕NC'ch' ⋄ ch←n ⋄ :EndIf
+
     :If ~ok ⋄ ('Failed to load file ',name)⎕SIGNAL 22 ⋄ :EndIf
     :If ~0=⍴⍴ch
     :OrIf ~ch∊1 2 3 4
       '# of channels must be 1, 2, 3 or 4'⎕SIGNAL 11
-    :EndIf                          
-    
-    len←h×w×ch
-    type←''('<0UTF8[] I4 >',data_type,'[]')                         
-    func←'STBIMG_Load_',data_type
-    data←h w ch⍴(func _Call_ type)name ch len
-  ∇
-  
-  ∇ data←{ch} Load name;ok;h;w;n
-    :Access Public Shared
-    (ok h w n)←Info name
-    :If 0=⎕NC'ch' ⋄ ch←n ⋄ :EndIf
-    data←ok h w ch('U1'_Load)name
-  ∇
+    :EndIf
 
-  ∇ data←{ch} LoadNorm name;ok;h;w;n
-    :Access Public Shared
-    (ok h w n)←Info name
-    :If 0=⎕NC'ch' ⋄ ch←n ⋄ :EndIf
-    data←65535÷⍨ok h w ch('U2'_Load)name
+    len←h×w×ch
+    type←'' '<0UTF8[] I4 >U1[]'
+    data←h w ch⍴('STBIMG_Load_U1'_Call_ type)name ch len
   ∇
 
   ∇ info←InfoMem mem;len;type
@@ -71,25 +56,25 @@
     info←('STBIMG_Info_Mem'_Call_ type)mem len 0 0 0
   ∇ 
 
-  ∇ data←{ch} LoadMem mem;len;ok;h;w;n;olen;type
+  ∇ data←{ch} LoadMem mem;memlen;ok;h;w;n;len;type
     :Access Public Shared
-    len←≢mem
+    memlen←≢mem
     (ok h w n)←InfoMem mem
     :If 0=⎕NC'ch' ⋄ ch←n ⋄ :EndIf
     
-    :If ~ok ⋄ ('Failed to load from buffer')⎕SIGNAL 22 ⋄ :EndIf
+    :If ~ok ⋄ 'Failed to load from buffer'⎕SIGNAL 22 ⋄ :EndIf
     :If ~0=⍴⍴ch
     :OrIf ~ch∊1 2 3 4
       '# of channels must be 1, 2, 3 or 4'⎕SIGNAL 11
     :EndIf
 
-    olen←h×w×ch
+    len←h×w×ch
     :If 80≡⎕DR mem
       type←'' '<C1[] I4 I4 >U1[]'
     :Else
       type←'' '<U1[] I4 I4 >U1[]'
     :EndIf
-    data←h w ch⍴('STBIMG_Load_U1_Mem'_Call_ type)mem len ch olen
+    data←h w ch⍴('STBIMG_Load_U1_Mem'_Call_ type)mem memlen ch len
   ∇
 
   Shape←{
@@ -151,39 +136,41 @@
     output←size PrivResize input 
   ∇
 
-  :Field Private Shared ReadOnly UPPER_LIMIT←720 1280
   :Field Private Shared ReadOnly LOWER_LIMIT←400 400
   
   ⍝ size: (height,width)
-  ∇ r←Squeeze size
+  ∇ r←Squeeze size;upper_limit
     :Access Private Shared
+    upper_limit←¯40 0+(⊃×100÷⊢/)'.'⎕WG'DevCaps'
     r←size
-    :If ∨/size>UPPER_LIMIT
-      r←⌊size×⌊/UPPER_LIMIT÷size 
+    :If ∨/size>upper_limit
+      r←⌊size×⌊/upper_limit÷size 
     :ElseIf ∨/size<LOWER_LIMIT 
       r←⌊size×⌈/LOWER_LIMIT÷size 
     :Endif
   ∇ 
 
-  ∇ {r}←{hd} DispForm data;pixels;size
-    :Access Public Shared
-    :If 0=⎕NC'hd' ⋄ hd←'∆f' ⋄ :EndIf
-    pixels←((256⊥3⍴⊢)⍤1)(Shape⍴⊢)data
-    size←Squeeze ⍴ pixels
-    r←hd ⎕WC'Form'('Caption' 'Disp')('Coord' 'RealPixel')('Size'size)
-    (hd,'.bit')⎕WC'Bitmap'('CBits'pixels)
-    (hd,'.img')⎕WC'Image'(0 0)('Picture'(hd,'.bit'))('Size'size)
-  ∇
+  IsChar←0 2∊⍨10|⎕DR
 
-  ∇ {r}←{hd} ShowForm name;ok;h;w;c;size 
+  ∇ {r}←{hd} ShowForm data;name;ok;h;w;c;pixels;size
     :Access Public Shared
-    :If 0=⎕NC'hd' ⋄ hd←'∆f' ⋄ :EndIf
-    (ok h w c)←Info name
-    :If ~ok ⋄ ('Failed to load file ',name)⎕SIGNAL 22 ⋄ :EndIf 
-    size←Squeeze h w 
-    r←hd ⎕WC'Form'('Caption'name)('Coord' 'RealPixel')('Size'size)
-    (hd,'.bit')⎕WC'Bitmap'('File'name)
-    (hd,'.img')⎕WC'Image'(0 0)('Picture'(hd,'.bit'))('Size'size)
+    :If 0=⎕NC'hd' ⋄ hd←'∆h' ⋄ :EndIf
+
+    :If IsChar data
+      name←data
+      (ok h w c)←Info name
+      :If ~ok ⋄ ('Failed to load file ',name)⎕SIGNAL 22 ⋄ :EndIf 
+      size←Squeeze h w 
+      r←hd ⎕WC'Form'('Caption'name)('Coord' 'Pixel')('Size'size)
+      (hd,'.bit')⎕WC'Bitmap'('File'name)
+      (hd,'.img')⎕WC'Image'(0 0)('Picture'(hd,'.bit'))('Size'size)
+    :Else
+      pixels←((256⊥3⍴⊢)⍤1)(Shape⍴⊢)data
+      size←Squeeze ⍴ pixels
+      r←hd ⎕WC'Form'('Caption' 'Show')('Coord' 'Pixel')('Size'size)
+      (hd,'.bit')⎕WC'Bitmap'('CBits'pixels)
+      (hd,'.img')⎕WC'Image'(0 0)('Picture'(hd,'.bit'))('Size'size)
+    :EndIf
   ∇
      
   ∇ HTML←EmitHTML data;y;h;w;c;type;ptr;len;nchars;ok;enc;URI
@@ -208,47 +195,48 @@
 
   ⍝ Note: multiple HTMLRenderers behave weird without &
 
-  ∇ {r}←{hd} Disp data;size;HR
+  ∇ {r}←{hd} Show data;HR
     :Access Public Shared 
-    :If 0=⎕NC'hd' ⋄ hd←'∆hr' ⋄ :EndIf
-    size←Squeeze ¯1↓Shape data
-    size+←16 0 ⍝ margin
+    :If 0=⎕NC'hd' ⋄ hd←'∆h' ⋄ :EndIf
+
     HR←⎕TSYNC{
-      x←'<!DOCTYPE html><html><head><title>Disp</title><style>'
-      x,←'img{image-rendering:pixelated;width:100%;height:100%;}'
-      x,←'</style></head><body>',(EmitHTML ⍵),'</body></html>'
-      ⍺ ⎕WC'HTMLRenderer'('Coord' 'RealPixel')('Size'size)('HTML'x)  
+      IsChar ⍵: ⍺ ⎕WC'HTMLRenderer'('URL'('file:///',⊃,/1 ⎕NPARTS ⍵))
+      x←'<!DOCTYPE html><html><head><title>Show</title><style>'
+      x,←'*{margin:0;padding:0;background-color:black;}'
+      x,←'div{display:grid;height:100%;}img{width:100%;height:100vh;'
+      x,←'margin:auto;object-fit:contain;image-rendering:pixelated;}'
+      x,←'</style></head><body><div>',(EmitHTML ⍵),'</div></body></html>'
+      ⍺ ⎕WC'HTMLRenderer'('HTML'x)
     }&
     r←hd HR data
   ∇
 
-  ∇ {r}←{hd} Show name;HR
-    :Access Public Shared 
-    :If 0=⎕NC'hd' ⋄ hd←'∆hr' ⋄ :EndIf
-    HR←⎕TSYNC{
-      ⍺ ⎕WC'HTMLRenderer'('URL'('file:///',⊃,/1 ⎕NPARTS ⍵))
-    }&
-    r←hd HR name
-  ∇
-
-  ∇ byte←ByteFromNorm norm
-    :Access Public Shared
-    byte←⌊255×norm
-  ∇
-
-  ∇ norm←NormFromByte byte
+  ∇ norm←Normalize byte
     :Access Public Shared
     norm←byte÷255
   ∇
 
-  ∇ chan←ChanFromGrid grid
+  ∇ byte←Denormalize norm
     :Access Public Shared
-    chan←(⊂⍤¯1)1 2 0⍉(Shape⍴⊢)grid
+    byte←⌊255×0⌈1⌊norm
   ∇
 
-  ∇ grid←GridFromChan chan
+  ∇ grid←Interleave chan
     :Access Public Shared
-    grid←2 0 1⍉↑chan
+    grid←2 0 1⍉chan
   ∇
+
+  ∇ chan←Deinterleave grid
+    :Access Public Shared
+    chan←1 2 0⍉grid
+  ∇
+
+  :Field Public Shared ReadOnly Y←1
+  :Field Public Shared ReadOnly YA←2
+  :Field Public Shared ReadOnly RGB←3
+  :Field Public Shared ReadOnly RGBA←4
+  :Field Public Shared ReadOnly GRAY←1
+  :Field Public Shared ReadOnly GRAY_ALPHA←2
+  :Field Public Shared ReadOnly RGB_ALPHA←4 
 
 :EndClass

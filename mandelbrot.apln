@@ -51,7 +51,7 @@
     stbimg.(Show ⍺ Save ⍵)
   }
   ∇ Run
-    stbimg.Disp Calc 1200 800
+    stbimg.Show Calc 1200 800
   ∇
 :EndNamespace
 
