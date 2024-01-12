@@ -11,25 +11,41 @@
     GetExt ⍵
   }
   :Field Private Shared ReadOnly LIB←GetExtWarn 'stbimg'
-  :Field Private Shared call_ns←⎕NS''
+  :Field Private Shared ReadOnly ffi←⎕NS⍬
 
-  ∇ rslt←(func _Call_ type) args;r;p;call
-    :Access Private Shared      
-    :If 3≠call_ns.⎕NC func 
-      (r p)←type
-      call←r,' ',LIB,'|',func,' ',p
-      call_ns.⎕NA call
-    :EndIf 
-    rslt←(call_ns⍎func)args      
-  ∇ 
+  Def←{
+    (n a)←⊆⍺
+    3=ffi.⎕NC a:11⎕SIGNAL⍨⎕←'redefining ',a
+    0::11⎕SIGNAL⍨⎕←'could not load ',n
+    (r p)←⍵
+    a(ffi.⎕NA)r,' ',LIB,'|',n,' ',p
+  }
+
+  'STBIMG_Info'    Def 'I4' '<0UTF8[] >I4 >I4 >I4'
+  'STBIMG_Load_I1' Def '' '<0UTF8[] I4 >I1[]'
+  
+  'STBIMG_Info_Mem'                   Def 'I4' '<U1[] I4 >I4 >I4 >I4'
+  'STBIMG_Info_Mem' 'STBIMG_Info_Chr' Def 'I4' '<C1[] I4 >I4 >I4 >I4'
+  'STBIMG_Load_Mem_I1'                      Def '' '<U1[] I4 I4 >I1[]'
+  'STBIMG_Load_Mem_I1' 'STBIMG_Load_Chr_I1' Def '' '<C1[] I4 I4 >I1[]'
+
+  'STBIMG_Save_PNG' Def 'I4' '<0UTF8[] I4 I4 I4 <I1[]'
+  'STBIMG_Save_BMP' Def 'I4' '<0UTF8[] I4 I4 I4 <I1[]'
+  'STBIMG_Save_JPG' Def 'I4' '<0UTF8[] I4 I4 I4 <I1[]'
+  'STBIMG_Save_TGA' Def 'I4' '<0UTF8[] I4 I4 I4 <I1[]'
+  
+  'STBIMG_Resize_I1' Def 'I4' '<I1[] I4 I4 >I1[] I4 I4 I4'
+
+  'STBIMG_Save_PNG_Mem' Def 'P' 'I4 I4 I4 <I1[] >I4'
+  'STBIMG_Encode_64' Def 'I4' 'P I4 >UTF8[] I4'
 
   ∇ info←Info name
     :Access Public Shared
     :If 0≡0 2∊⍨10|⎕DR name ⋄ 'Not a file name'⎕SIGNAL 11 ⋄ :EndIf
-    info←('STBIMG_Info'_Call_'I4' '<0UTF8[] >I4 >I4 >I4')name 0 0 0
+    info←ffi.STBIMG_Info (name 0 0 0)
   ∇
 
-  ∇ data←{ch} Load name;ok;h;w;n;len;type
+  ∇ data←{ch} Load name;ok;h;w;n
     :Access Public Shared
     (ok h w n)←Info name
     :If 0=⎕NC'ch' ⋄ ch←n ⋄ :EndIf
@@ -40,25 +56,20 @@
       '# of channels must be 1, 2, 3 or 4'⎕SIGNAL 11
     :EndIf
 
-    len←h×w×ch
-    type←'' '<0UTF8[] I4 >U1[]'
-    data←h w ch⍴('STBIMG_Load_U1'_Call_ type)name ch len
+    data←h w ch⍴ffi.STBIMG_Load_I1 (name ch (h×w×ch))
   ∇
 
-  ∇ info←InfoMem mem;len;type
+  ∇ info←InfoMem mem
     :Access Public Shared
-    len←≢mem
     :If 80≡⎕DR mem
-      type←'I4' '<C1[] I4 >I4 >I4 >I4'
+      info←ffi.STBIMG_Info_Chr (mem (≢mem) 0 0 0)
     :Else
-      type←'I4' '<U1[] I4 >I4 >I4 >I4'
+      info←ffi.STBIMG_Info_Mem (mem (≢mem) 0 0 0)
     :EndIf
-    info←('STBIMG_Info_Mem'_Call_ type)mem len 0 0 0
   ∇ 
 
-  ∇ data←{ch} LoadMem mem;memlen;ok;h;w;n;len;type
+  ∇ data←{ch} LoadMem mem;ok;h;w;n
     :Access Public Shared
-    memlen←≢mem
     (ok h w n)←InfoMem mem
     :If 0=⎕NC'ch' ⋄ ch←n ⋄ :EndIf
     
@@ -68,13 +79,11 @@
       '# of channels must be 1, 2, 3 or 4'⎕SIGNAL 11
     :EndIf
 
-    len←h×w×ch
     :If 80≡⎕DR mem
-      type←'' '<C1[] I4 I4 >U1[]'
+      data←h w ch⍴ffi.STBIMG_Load_Chr_I1 (mem (≢mem) ch (h×w×ch))
     :Else
-      type←'' '<U1[] I4 I4 >U1[]'
+      data←h w ch⍴ffi.STBIMG_Load_Mem_I1 (mem (≢mem) ch (h×w×ch))
     :EndIf
-    data←h w ch⍴('STBIMG_Load_U1_Mem'_Call_ type)mem memlen ch len
   ∇
 
   Shape←{
@@ -84,45 +93,40 @@
     'Image data should be rank 2 or 3'⎕SIGNAL 11
   }
 
-  ∇ name←name Save data;type;Ext;x;y;h;w;c;rslt
-    :Access Public Shared                 
-    type←'I4' '<0UTF8[] I4 I4 I4 <U1[]'
-    Ext←{1↓2⊃1⎕NPARTS⍵}
-    x←¯1⎕C Ext name
-        
-    y←,data ⋄ (h w c)←Shape data  
-    :If ~c∊1 2 3 4
+  ∇ name←name Save data;ext;h;w;ch;ok
+    :Access Public Shared
+    ext←¯1⎕C {1↓2⊃1⎕NPARTS⍵} name
+
+    (h w ch)←Shape data  
+    :If ~ch∊1 2 3 4
       '# of channels must be 1, 2, 3 or 4'⎕SIGNAL 11
     :EndIf  
 
-    :Select ¯1⎕C x
+    :Select ¯1⎕C ext
     :Case 'png' 
-      rslt←('STBIMG_Save_PNG'_Call_ type)name h w c y
+      ok←ffi.STBIMG_Save_PNG (name h w ch (,data))
     :Case 'bmp'
-      rslt←('STBIMG_Save_BMP'_Call_ type)name h w c y 
+      ok←ffi.STBIMG_Save_BMP (name h w ch (,data)) 
     :CaseList 'jpg' 'jpeg'
-      rslt←('STBIMG_Save_JPG'_Call_ type)name h w c y
+      ok←ffi.STBIMG_Save_JPG (name h w ch (,data))
     :Case 'tga'
-      rslt←('STBIMG_Save_TGA'_Call_ type)name h w c y 
+      ok←ffi.STBIMG_Save_TGA (name h w ch (,data)) 
     :Else  
-      ('File extension ',x,' is not supported')⎕SIGNAL 11
+      ('File extension ',ext,' is not supported')⎕SIGNAL 11
     :EndSelect
-    :If rslt≡0 ⋄ 
-    ('Failed to save file ',name)⎕SIGNAL 22 ⋄ 
+
+    :If ok≡0
+      ('Failed to save file ',name)⎕SIGNAL 22 ⋄ 
     :EndIf
   ∇
 
   PrivResize←{
     (oh ow)←⍺ 
-    (ih iw c)←Shape ⍵
-    olen←oh×ow×c
-    y←,⍵
-
-    type←'I4' '<U1[] I4 I4 >U1[] I4 I4 I4'
-    (ok output)←('STBIMG_Resize_U1'_Call_ type)y ih iw olen oh ow c
+    (ih iw ch)←Shape ⍵
+    (ok out)←ffi.STBIMG_Resize_I1 ((,⍵) ih iw (oh×ow×ch) oh ow ch)
     
     ~ok:'Failed to resize'⎕SIGNAL 11
-    oh ow c⍴output
+    oh ow ch⍴out
   }
 
   ∇ output←size Resize input
@@ -152,41 +156,39 @@
 
   IsChar←0 2∊⍨10|⎕DR
 
-  ∇ {r}←{hd} ShowForm data;name;ok;h;w;c;pixels;size
+  ∇ {r}←{hd} ShowForm data;name;ok;h;w;ch;pixels;size
     :Access Public Shared
     :If 0=⎕NC'hd' ⋄ hd←'∆h' ⋄ :EndIf
 
     :If IsChar data
       name←data
-      (ok h w c)←Info name
+      (ok h w ch)←Info name
       :If ~ok ⋄ ('Failed to load file ',name)⎕SIGNAL 22 ⋄ :EndIf 
       size←Squeeze h w 
       r←hd ⎕WC'Form'('Caption'name)('Coord' 'Pixel')('Size'size)
       (hd,'.bit')⎕WC'Bitmap'('File'name)
       (hd,'.img')⎕WC'Image'(0 0)('Picture'(hd,'.bit'))('Size'size)
     :Else
-      pixels←((256⊥3⍴⊢)⍤1)(Shape⍴⊢)data
+      pixels←((256⊥3⍴⊢↑⍨1+2×2<≢)⍤1)256|(Shape⍴⊢)data
       size←Squeeze ⍴ pixels
       r←hd ⎕WC'Form'('Caption' 'Show')('Coord' 'Pixel')('Size'size)
       (hd,'.bit')⎕WC'Bitmap'('CBits'pixels)
       (hd,'.img')⎕WC'Image'(0 0)('Picture'(hd,'.bit'))('Size'size)
     :EndIf
   ∇
-     
-  ∇ HTML←EmitHTML data;y;h;w;c;type;ptr;len;nchars;ok;enc;URI
+
+  ∇ HTML←EmitHTML data;h;w;ch;ptr;len;nchars;ok;enc;URI
     :Access Public Shared 
-    
-    y←,data ⋄ (h w c)←Shape data 
-    :If ~c∊1 2 3 4
+
+    (h w ch)←Shape data 
+    :If ~ch∊1 2 3 4
       '# of channels must be 1, 2, 3 or 4'⎕SIGNAL 11
     :EndIf
 
-    type←'P' 'I4 I4 I4 <U1[] >I4'
-    (ptr len)←('STBIMG_Save_PNG_Mem'_Call_ type)h w c y 0
-    
+    (ptr len)←ffi.STBIMG_Save_PNG_Mem (h w ch (,data) 0)    
     nchars←4×⌊3÷⍨2+len
-    type←'I4' 'P I4 >UTF8[] I4'
-    (ok enc)←('STBIMG_Encode_64'_Call_ type)ptr len nchars nchars
+    (ok enc)←ffi.STBIMG_Encode_64 (ptr len nchars nchars)
+
     :If ~ok ⋄ 'Failed to encode image'⎕SIGNAL 6 ⋄ :EndIf
     
     URI←'data:image/png;base64,',enc
@@ -211,14 +213,24 @@
     r←hd HR data
   ∇
 
+  ∇ uint←ToUnsigned byte
+    :Access Public Shared
+    uint←256|byte
+  ∇
+
+  ∇ byte←ToSigned uint
+    :Access Public Shared
+    byte←¯128+256|128+uint
+  ∇
+
   ∇ norm←Normalize byte
     :Access Public Shared
-    norm←byte÷255
+    norm←255÷⍨256|byte
   ∇
 
   ∇ byte←Denormalize norm
     :Access Public Shared
-    byte←⌊255×0⌈1⌊norm
+    byte←¯128+256|128+⌊255×0⌈1⌊norm
   ∇
 
   ∇ grid←Interleave chan

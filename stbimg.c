@@ -13,9 +13,17 @@
 #define STB_IMAGE_WRITE_STATIC
 #define STBIW_WINDOWS_UTF8
 #include "stb_image_write.h"
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds" 
+#endif
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #define STB_IMAGE_RESIZE_STATIC
-#include "stb_image_resize.h"
+#include "stb_image_resize2.h"
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
@@ -39,6 +47,7 @@
 
 typedef uint8_t  U1;
 typedef uint16_t U2;
+typedef int8_t   I1;
 typedef int32_t  I4;
 typedef float    F4;
 
@@ -48,7 +57,7 @@ STBIMG_API I4 STBIMG_Info(char const *filename, I4 *height, I4 *width, I4 *chann
     return stbi_info(filename, width, height, channels);
 }
 
-STBIMG_API void STBIMG_Load_U1(char const *filename, I4 channels, U1 *rawdata) {
+STBIMG_API void STBIMG_Load_I1(char const *filename, I4 channels, I1 *rawdata) {
     I4 width = 0, height = 0, comp = 0;
     U1 *data = stbi_load(filename, &width, &height, &comp, channels);
     memcpy(rawdata, data, width*height*channels*sizeof(U1));
@@ -74,26 +83,26 @@ STBIMG_API I4 STBIMG_Info_Mem(U1 const *mem, I4 len, I4 *height, I4 *width, I4 *
     return stbi_info_from_memory(mem, len, width, height, channels);
 }
 
-STBIMG_API void STBIMG_Load_U1_Mem(U1 const *mem, I4 len, I4 channels, U1 *rawdata) {
+STBIMG_API void STBIMG_Load_Mem_I1(U1 const *mem, I4 len, I4 channels, I1 *rawdata) {
     I4 width = 0, height = 0, comp = 0;
     U1 *data = stbi_load_from_memory(mem, len, &width, &height, &comp, channels);
     memcpy(rawdata, data, width*height*channels*sizeof(U1));
     stbi_image_free(data);
 }
 
-STBIMG_API I4 STBIMG_Save_PNG(char const *filename, I4 height, I4 width, I4 channels, U1 *rawdata) {
-    return stbi_write_png(filename, width, height, channels, rawdata, channels*width*sizeof(U1));
+STBIMG_API I4 STBIMG_Save_PNG(char const *filename, I4 height, I4 width, I4 channels, I1 *rawdata) {
+    return stbi_write_png(filename, width, height, channels, rawdata, channels*width*sizeof(I1));
 }
 
-STBIMG_API I4 STBIMG_Save_BMP(char const *filename, I4 height, I4 width, I4 channels, U1 *rawdata) {
+STBIMG_API I4 STBIMG_Save_BMP(char const *filename, I4 height, I4 width, I4 channels, I1 *rawdata) {
     return stbi_write_bmp(filename, width, height, channels, rawdata);
 }
 
-STBIMG_API I4 STBIMG_Save_JPG(char const *filename, I4 height, I4 width, I4 channels, U1 *rawdata) {
+STBIMG_API I4 STBIMG_Save_JPG(char const *filename, I4 height, I4 width, I4 channels, I1 *rawdata) {
     return stbi_write_jpg(filename, width, height, channels, rawdata, 100);
 }
 
-STBIMG_API I4 STBIMG_Save_TGA(char const *filename, I4 height, I4 width, I4 channels, U1 *rawdata) {
+STBIMG_API I4 STBIMG_Save_TGA(char const *filename, I4 height, I4 width, I4 channels, I1 *rawdata) {
     return stbi_write_tga(filename, width, height, channels, rawdata);
 }
 
@@ -140,14 +149,16 @@ STBIMG_API I4 STBIMG_Encode_64(U1 *mem, I4 len, U1 *out, I4 nchars) {
     return r;
 }
 
-STBIMG_API I4 STBIMG_Resize_U1(
-    U1 *input,  I4 in_height,  I4 in_width, 
-    U1 *output, I4 out_height, I4 out_width, I4 channels
+STBIMG_API I4 STBIMG_Resize_I1(
+    I1 *input,  I4 in_height,  I4 in_width, 
+    I1 *output, I4 out_height, I4 out_width, I4 channels
 ) {
-    return stbir_resize_uint8(
-        input,  in_width,  in_height,  0, 
-        output, out_width, out_height, 0,
-        channels
+    U1 *r = stbir_resize_uint8_srgb(
+        (U1 *)input,  in_width,  in_height,  0, 
+        (U1 *)output, out_width, out_height, 0,
+        (stbir_pixel_layout)channels
     );
+    if (!r) {return 0;}
+    return 1;
 }
 
