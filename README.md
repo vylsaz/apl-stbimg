@@ -1,10 +1,8 @@
 # apl-stbimg
 Save, load and resize image in Dyalog APL. Based on [stb_image](https://github.com/nothings/stb).
 
-![example](image/mandelbrot.png)
-
 ## Build
-- (Optional) Get the newest `stb_image.h`, `stb_image_resize.h` and `stb_image_write.h` files from the [stb](https://github.com/nothings/stb) repository.
+- (Optional) Get the newest `stb_image.h`, `stb_image_resize2.h` and `stb_image_write.h` files from the [stb](https://github.com/nothings/stb) repository.
 - Build the shared library
 
   - Windows using MinGW-w64:
@@ -31,6 +29,7 @@ The namespace/class stbimg is in `stbimg.aplc`.
 
 The documentation assumes ```⎕IO ⎕ML←0 1```. `stbimg` itself is ⎕IO and ⎕ML insensitive. 
 
+**NOTE**: we are using _signed_ bytes (0 to 127, ¯128 to ¯1) for image data
 
 ### Load Image
 
@@ -47,7 +46,7 @@ X, if present, is one of 1, 2, 3 or 4. It represents the number of color channel
 | 4                  | rgb and alpha       | `stbimg.RGBA`, `stbimg.RGB_ALPHA` |
 
 If X is not present, the number of channels is decided by the image.  
-R is a rank 3 integer (0-255) array, whose shape equals to `(height, width, channels)` of the image.
+R is a rank 3 signed byte (0-127, ¯128-¯1) array, whose shape equals to `(height, width, channels)` of the image.
 
 ```apl
 R←{X} stbimg.LoadMem Y
@@ -129,16 +128,28 @@ R is a refrence to the GUI object.
 ### Helpers
 
 ```apl
+R←stbimg.ToUnsigned Y
+```
+Y is an array of 0-127 and ¯128-¯1 signed bytes.  
+R is an array of 0-255 integers (converting ¯128-¯1 to 128-255).
+
+```apl
+R←stbimg.ToSigned Y
+```
+Y is an array of 0-255 integers an array of 0-127 and ¯128-¯1 signed bytes.  
+R is an array of 0-127 and ¯128-¯1 signed bytes (converting 128-255 to ¯128-¯1).
+
+```apl
 R←stbimg.Normalize Y
 ```
-Y is an array of 0-255 integers.  
-R is the corresponding  0-1 floating point number values.
+Y is an array of 0-127 and ¯128-¯1 signed bytes.  
+R is the corresponding 0-1 floating point number values.
 
 ```apl
 R←stbimg.Denormalize Y
 ```
 Y is an array of 0-1 floating point numbers.  
-R is the corresponding 0-255 integer values.
+R is the corresponding 0-127 and ¯128-¯1 signed byte values.
 
 ```apl
 R←stbimg.Interleave Y
@@ -172,4 +183,4 @@ On Windows, a dialog about network access might show up -- that can be (a) mande
 ## License
 `stbimg.c`, `stbimg.aplc`, `halftone.apln` and `mandelbrot.apln` are under MIT license.
 
-`stb_image.h`, `stb_image_resize.h` and `stb_image_write.h` are in the public domain. Big thanks to all contributors of the stb library.
+`stb_image.h`, `stb_image_resize2.h` and `stb_image_write.h` are in the public domain. Big thanks to all contributors of the stb library.
