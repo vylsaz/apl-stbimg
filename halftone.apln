@@ -13,17 +13,17 @@
     0.299 0.587 0.114+.×⍵
   }
 
-  ∇ r←(weight _ErrorDiffusion_ coords) img;len;shp;o;i;p;e;n;m
-    r←,img ⋄ len←≢r
+  ∇ r←(weight _ErrorDiffusion_ coords) img;shp;len;o;i;y
+    :If weight≢⍥≢coords ⋄ ⎕SIGNAL 5 ⋄ :EndIf
     shp←⍴img
+    len←×/shp
     o←(shp⊥⊢)¨coords
-    :For i :In ⍳len       ⍝ this is a very imperative algorithm.
-      p←r[i]
-      r[i]←p>0.5          ⍝ apply threshold
-      e←p-r[i]            ⍝ quantization error
-      n←i+o               ⍝ neighbours
-      m←n<len             ⍝ valid neighbours
-      r[m/n]+←e×m/weight  ⍝ distribute error to neighbours
+    r←(len+⌈/o)↑,img
+    :For i :In ⍳len  ⍝ this is a very imperative algorithm.
+      r[i+o]+←weight×y-r[i]←0.5<y←r[i]
+      ⍝      │        │    └─ apply threshold
+      ⍝      │        └─ quantization error
+      ⍝      └─ distribute error to neighbours
     :EndFor
     r←shp⍴r
   ∇
@@ -71,28 +71,23 @@
     1<⍵+p[ph|⍳ih;pw|⍳iw] ⍝ wrapped indexing, then apply threshold
   }
 
-  ∇ Run;F;u;g;i;n;y;r;h;H
-    :If 0=⎕NC'#.HttpCommand'
-      ('Please',(⎕UCS 13),'      ]load HttpCommand')⎕SIGNAL 6
-    :EndIf
+  ∇ Demo i;F;H;h;y;r
     F←{'<figure>',⍺,'<figcaption>',⍵,'</figcaption></figure>'}
-    u←'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'
-    ⎕←g←#.HttpCommand.Get u
+    H←stbimg.(EmitHTML∘Denormalize)
 
     h←'<!DOCTYPE html><html><head><title>demo</title>'
     h,←'<style>div{display:flex;flex-wrap:wrap;}</style>'
-
     h,←'</head><body><div>'
-
-    i←stbimg.(RGB LoadMem ⊢)g.Data
+    
     h,←(stbimg.EmitHTML i) F ⎕←'original'
 
-    n←stbimg.Normalize i
-    y←(ToLuminance⍤1)n
+    y←(ToLuminance⍤1)stbimg.Normalize i
 
-    H←stbimg.(EmitHTML∘Denormalize)
+    ⍝ simply cutoff
+    r←y>0.5
+    h,←(H r) F ⎕←'cutoff'
 
-    ⍝ faster, but looks not that good
+    ⍝ more detail, but looks not that good
     r←0.1 RandomDither y
     h,←(H r) F ⎕←'random dither'
 
@@ -100,22 +95,27 @@
     r←2 (Bayer _orderedDither) y
     h,←(H r) F ⎕←'ordered dither'
 
-    ⍝ it's too slow for larger images...
+    ⍝ this algorithm is hard to parallelize...
     r←Atkinson y
-    h,←(H r) F ⎕←'error diffusion (grayscale)'
-
-    ⍝ we can generalize this to all three channels
-    r←(Floyd_Steinberg⍤2) stbimg.Deinterleave n
-    h,←(H stbimg.Interleave r) F ⎕←'error diffusion (rgb)'
+    h,←(H r) F ⎕←'error diffusion'
 
     ⍝ what if we filter out the noisy parts?
     ⍝ i.e. take the average in a window
     ⍝ this is how halftoning works, because
     ⍝ human eyes act like a low pass filter
-    h,←(H stbimg.Interleave (LowPass⍤2)r) F ⎕←'low pass filter'
+    h,←(H (LowPass⍤2) r) F ⎕←'low pass filter'
 
     h,←'</div></body></html>'
     
     'hr'⎕WC'HTMLRenderer'h
+  ∇
+
+  ∇ Run;u;g
+    :If 0=⎕NC'#.HttpCommand'
+      ('Please',(⎕UCS 13),'      ]load HttpCommand')⎕SIGNAL 6
+    :EndIf
+    u←'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'
+    ⎕←g←#.HttpCommand.Get u
+    Demo stbimg.(RGB LoadMem ⊢)g.Data
   ∇
 :EndNamespace
