@@ -19,7 +19,7 @@
     len←×/shp
     o←(shp⊥⊢)¨coords
     r←(len+⌈/o)↑,img
-    :For i :In ⍳len  ⍝ this is a very imperative algorithm.
+    :For i :In ⍳len  ⍝ this is a very sequential algorithm.
       r[i+o]+←weight×y-r[i]←0.5<y←r[i]
       ⍝      │        │    └─ apply threshold
       ⍝      │        └─ quantization error
@@ -64,11 +64,12 @@
     ⍝ - outer product but the rank remains 2.
   }
 
+  ⍝ https://github.com/LdBeth/pnmaster/blob/main/APL_code/Image/tiling.aplf
+  Tile←{⍵⍴⍵[1](⍴⍤1)⍺}  ⍝ resize ⍺ (2D) to shape ⍵
+
   _orderedDither←{
-    p←(1∘+÷×/∘⍴) ⍺⍺ ⍺    ⍝ pre-calculated weight
-    (ph pw)←⍴p
-    (ih iw)←⍴⍵
-    1<⍵+p[ph|⍳ih;pw|⍳iw] ⍝ wrapped indexing, then apply threshold
+    p←(1∘+÷×/∘⍴) ⍺⍺ ⍺  ⍝ pre-calculated weight
+    1<⍵+p Tile⍴⍵       ⍝ apply weight, then threshold
   }
 
   ∇ Demo i;F;H;h;y;r
@@ -83,9 +84,9 @@
 
     y←(ToLuminance⍤1)stbimg.Normalize i
 
-    ⍝ simply cutoff
+    ⍝ simply threshold
     r←y>0.5
-    h,←(H r) F ⎕←'cutoff'
+    h,←(H r) F ⎕←'threshold'
 
     ⍝ more detail, but looks not that good
     r←0.1 RandomDither y
@@ -103,7 +104,7 @@
     ⍝ i.e. take the average in a window
     ⍝ this is how halftoning works, because
     ⍝ human eyes act like a low pass filter
-    h,←(H (LowPass⍤2) r) F ⎕←'low pass filter'
+    h,←(H LowPass r) F ⎕←'low pass filter'
 
     h,←'</div></body></html>'
     
